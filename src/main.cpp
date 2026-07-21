@@ -206,7 +206,7 @@ BookSnapshot OrderBook::snapshot(Timestamp ts) const {
 
 class Simulator;
 class Event {
-protected:
+private:
     Timestamp m_sentTs{};
     SequenceNumber m_sqNum{};
     inline static SequenceNumber m_nextSqNum{};
