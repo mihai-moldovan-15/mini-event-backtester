@@ -4,14 +4,12 @@
 
 class Fill {
 private:
-    FillId m_id{};
     Symbol m_symbol{};
     OrderId m_orderId{};
     Timestamp m_ts{};
     Side m_side{};
     Quantity m_quantity{};
     Price m_price{};
-    inline static FillId m_nextId{};
 
 public:
     Fill() = default;

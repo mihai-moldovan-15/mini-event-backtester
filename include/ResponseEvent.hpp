@@ -7,7 +7,7 @@ enum class ResponseType {
     CancelFailed,
     Modified,
     ModifyFailed,
-    Accepted,
+    Resting,
 
     Filled,
     PartiallyFilled,

@@ -41,20 +41,21 @@ public:
     const auto& getBids() const { return m_bids; }
     const Symbol& getSymbol() const { return m_symbol; }
 
-    friend std::ostream& operator<<(std::ostream& out, const OrderBook& book);
     //bool checkFill(const Order& order);///fac verificarea direct in processAddOrder
 
     void recordTrade(const Order& incoming, const Order& existing, Price price, Quantity qty,
                              Timestamp currentTime, std::vector<ResponseEvent>& responses);
     /// adaugarea efectiva in book, procesarea eventurilor, intorc response events
-    std::vector<ResponseEvent> processAddOrder(const Order& order, Timestamp currentTime); ///aici se intampla crossingul, poate genera mai multe responseuri
+    std::vector<ResponseEvent> processAddOrder(const Order& order, Cash availableCash, Timestamp currentTime); ///aici se intampla crossingul, poate genera mai multe responseuri
     ResponseEvent processCancelOrder(OrderId orderid, Timestamp currentTime);
-    std::vector<ResponseEvent> processModifyOrder(OrderId id, Quantity newQty, std::optional<Price> newPrice, Timestamp currentTime);///add ul poate genera mai multe responseuri
+    std::vector<ResponseEvent> processModifyOrder(OrderId id, Quantity newQty, std::optional<Price> newPrice,
+                                                   Cash availableCash, Timestamp currentTime);///add ul poate genera mai multe responseuri
 
     Price getMarkPrice() const;
     Price getSpread() const;
 
     void validate() const;
+    friend std::ostream& operator<<(std::ostream& out, const OrderBook& book);
 };
 
 

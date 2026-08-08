@@ -1,7 +1,6 @@
 #include "Simulator.hpp"
 
 #include <algorithm>
-#include <iostream>
 #include <fstream>
 #include <memory>
 #include <chrono>
@@ -11,12 +10,15 @@
 void Simulator::run() {
     size_t histIdx = 0;
 
-    while ((histIdx < m_historicalEvents.size() || !m_personalEvents.empty()) && m_currentTime < m_endTime) {
+    while (histIdx < m_historicalEvents.size() || !m_personalEvents.empty()) {
         bool histAvailable = histIdx < m_historicalEvents.size();
         bool persAvailable = !m_personalEvents.empty();
 
         Timestamp histTs = histAvailable ? m_historicalEvents[histIdx]->getTimeStamp() : std::numeric_limits<Timestamp>::max();
         Timestamp persTs = persAvailable ? m_personalEvents.top()->getTimeStamp() : std::numeric_limits<Timestamp>::max();
+
+        if (std::min(histTs, persTs) >= m_endTime)
+            break;
 
         if (histAvailable && histTs <= persTs) {
             m_currentTime = histTs;
@@ -30,14 +32,31 @@ void Simulator::run() {
             event->execute(*this);
         }
     }
+
+    m_portfolio.liquidate(m_orderBooks);
+    cancelAllOpenOrders();
 }
 
+void Simulator::cancelAllOpenOrders() {
+    std::vector<OrderId> ids;
+    ids.reserve(m_OrderIdToSymbol.size());
+    for (const auto& [orderId, symbol] : m_OrderIdToSymbol)
+        ids.push_back(orderId);
+
+    for (OrderId id : ids) {
+        auto it = m_OrderIdToSymbol.find(id);
+        if (it == m_OrderIdToSymbol.end())
+            continue;
+        auto response = m_orderBooks.at(it->second).processCancelOrder(id, m_currentTime);
+        handleResponse(response);
+    }
+}
 
 void Simulator::handleResponse(const ResponseEvent& resp) {
     if (!resp.isOwn)
         return;
 
-    if (resp.type == ResponseType::Accepted || resp.type == ResponseType::PartiallyFilled)
+    if (resp.type == ResponseType::Resting || resp.type == ResponseType::PartiallyFilled)
         m_OrderIdToSymbol[resp.orderId] = resp.symbol;
     else if (resp.type == ResponseType::Filled || resp.type == ResponseType::Cancelled)
         m_OrderIdToSymbol.erase(resp.orderId);
@@ -62,9 +81,10 @@ void Simulator::loadHistoricalEvents(const std::filesystem::path& dataFile) {
         if (order.getQuantity() <= 0)
             continue;
         m_historicalEvents.push_back(std::make_unique<AddOrderEvent>(order.getTimeStamp(), order));
+        addBook(order.getSymbol());
     }
 
-    std::stable_sort(m_historicalEvents.begin(), m_historicalEvents.end(),
+    std::ranges::stable_sort(m_historicalEvents,
                 [](const auto& a, const auto& b) { return a->getTimeStamp() < b->getTimeStamp(); });
 }
 
@@ -105,8 +125,6 @@ void Simulator::scheduleTimer() {
 void Simulator::addBook(const Symbol& symbol) {
     if (m_orderBooks.find(symbol) == m_orderBooks.end())
         m_orderBooks.emplace(symbol, OrderBook(symbol));
-    else
-        throw std::logic_error("Book already exists for symbol: " + symbol);
 }
 
 void Simulator::runStrategy() {
@@ -124,8 +142,10 @@ void Simulator::runStrategy() {
 
     m_strategyNextAvailableTime = m_currentTime + processingTime;
 
-    for (auto& action : strategyActions) {
-        action->addLatency(m_latency);
-        m_personalEvents.push(std::move(action));
+    if (strategyActions.has_value()) {
+        for (auto& action : *strategyActions) {
+            action->addLatency(m_sendLatency);
+            m_personalEvents.push(std::move(action));
+        }
     }
 }

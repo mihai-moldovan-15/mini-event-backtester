@@ -11,7 +11,8 @@ Order::Order(SymbolView symbol, Timestamp ts, Side side, Quantity quantity, Orde
 {
     if (type == OrderType::Limit && !limitPrice)
         throw std::invalid_argument("Limit order requires a price");
-
+    if (type == OrderType::Limit && limitPrice < 0)
+        throw std::invalid_argument("Limit order cannot have negative price");
     if (quantity <= 0)
         throw std::invalid_argument("Quantity must be positive");
 }
@@ -23,6 +24,8 @@ Order::Order(OrderId id, SymbolView symbol, Timestamp ts, Side side, Quantity qu
 {
     if (type == OrderType::Limit && !limitPrice)
         throw std::invalid_argument("Limit order requires a price");
+    if (type == OrderType::Limit && limitPrice < 0)
+        throw std::invalid_argument("Limit order cannot have negative price");
     if (quantity <= 0)
         throw std::invalid_argument("Quantity must be positive");
 }
@@ -46,6 +49,10 @@ std::ostream& operator<<(std::ostream& out, const Order& order) {
 std::istream& operator>>(std::istream& in, Order& order) {
     Symbol symbol{};
     in >> symbol;
+
+    if (in.eof())
+        return in;
+
     Timestamp ts{};
     in >> ts;
 

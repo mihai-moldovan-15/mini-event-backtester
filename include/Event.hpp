@@ -1,6 +1,7 @@
 #pragma once
 #include "Types.hpp"
 #include "Order.hpp"
+#include "ResponseEvent.hpp"
 #include <memory>
 #include <optional>
 
@@ -54,6 +55,16 @@ public:
     ModifyOrderEvent(Timestamp sentTs, OrderId id, Quantity q, std::optional<Price> p)
         : Event(sentTs), m_orderId(id), m_newQuantity(q), m_newLimitPrice(p) {}
     void execute(Simulator& s) override;
+};
+
+class MarketReturnEvent : public Event {
+private:
+    ResponseEvent m_response{};
+public:
+    MarketReturnEvent(Timestamp ts, ResponseEvent response)
+        : Event(ts), m_response(std::move(response)) {}
+
+    void execute(Simulator& simulator) override;
 };
 
 struct eventCompare {

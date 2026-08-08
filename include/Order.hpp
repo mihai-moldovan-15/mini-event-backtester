@@ -36,7 +36,6 @@ public:
     bool isOwn() const { return m_isOwn; }
 
     void setQuantity(Quantity newQuantity) { m_quantity = newQuantity; }
-    void setLimitPrice(std::optional<Price> newLimitPrice) { if (newLimitPrice) m_limitPrice = newLimitPrice; }
 
     friend std::ostream& operator<<(std::ostream& out, const Order& order);
     friend std::istream& operator>>(std::istream& in, Order& order);

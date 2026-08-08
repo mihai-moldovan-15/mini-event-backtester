@@ -13,9 +13,10 @@
 class Simulator {
 private:
     Timestamp m_currentTime{};
-    const Timestamp m_latency{ 3'000'000 };
+    const Timestamp m_sendLatency{ 3'000'000 };
+    const Timestamp m_returnLatency{ 3'000'000 };
     const Timestamp m_timeDelta{ 2'000'000 };
-    Timestamp m_endTime{ 1'000'000'000 };
+    Timestamp m_endTime{ 21'000'000'000 };
     Portfolio m_portfolio;
     std::unordered_map<Symbol, OrderBook> m_orderBooks{};
     std::priority_queue<std::unique_ptr<Event>, std::vector<std::unique_ptr<Event>>, eventCompare> m_personalEvents{};
@@ -24,29 +25,32 @@ private:
     std::vector<Fill> m_fillsRecord{};
     std::vector<ResponseEvent> m_pendingResponses{};
 
+
     std::unique_ptr<Strategy> m_strategy{};
     Timestamp m_strategyNextAvailableTime{};
 public:
     void run();
 
-    Simulator(Cash initialCash, Timestamp endTime = 1'000'000'000) : m_portfolio{initialCash}, m_endTime(endTime){}
-    void setStrategy(std::unique_ptr<Strategy> strategy) { m_strategy = std::move(strategy); }
+    Simulator(std::unique_ptr<Strategy> strategy, Cash initialCash, Timestamp endTime = 1'000'000'000) :
+                            m_strategy(std::move(strategy)), m_portfolio{initialCash}, m_endTime(endTime){}
     Timestamp getCurrTimeStamp() const { return m_currentTime; }
     const Portfolio& getPortfolio() const { return m_portfolio; }
 
     OrderBook& getOrderBook(const Symbol& symbol); //not ideal
     const OrderBook& getOrderBook(const Symbol& symbol) const;
     const std::unordered_map<Symbol, OrderBook>& getOrderBooks() const { return m_orderBooks; }
-    OrderBook& getOrderBookForOrder(OrderId id);///modify si cancel
+    OrderBook& getOrderBookForOrder(OrderId id);//modify si cancel
+    const Timestamp getReturnLatency() const { return m_returnLatency; }
 
     const std::vector<Fill>& getFillsRecord() const { return m_fillsRecord; }
 
     void loadHistoricalEvents(const std::filesystem::path& dataFile);
     void scheduleTimer();
-    void addBook(const Symbol& symbol);
     void handleResponse(const ResponseEvent& resp);
     void runStrategy();
 
+    void addBook(const Symbol& symbol);
+    void cancelAllOpenOrders();
 
-    void scheduleEvent(std::unique_ptr<Event> event) { m_personalEvents.push(std::move(event)); }///pentru testare
+    void scheduleEvent(std::unique_ptr<Event> event) { m_personalEvents.push(std::move(event)); }
 };

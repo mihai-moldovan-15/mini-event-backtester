@@ -42,7 +42,6 @@ void OrderBook::validate() const {
 }
 
 Price OrderBook::getMarkPrice() const {
-
     Price bestAskPrice{ getBestAsk() };
     Price bestBidPrice{ getBestBid() };
 
@@ -77,14 +76,17 @@ void OrderBook::recordTrade(const Order& incoming, const Order& existing, Price 
                                existing.isOwn(), qty ,price} );
 }
 
-std::vector<ResponseEvent> OrderBook::processAddOrder(const Order& order, Timestamp currentTime) {
+std::vector<ResponseEvent> OrderBook::processAddOrder(const Order& order, Cash availableCash, Timestamp currentTime) {
     Order newOrder = order;
     std::vector<ResponseEvent> responseEvents{};
 
     if (newOrder.getOrderSide() == Side::Buy) {
         auto& levels = m_asks;
         auto it = levels.begin();
-        while (newOrder.getQuantity() > 0 && it != levels.end()) {
+        Cash remainingCash = availableCash;
+        bool cashExhausted = false;
+
+        while (newOrder.getQuantity() > 0 && it != levels.end() && !cashExhausted) {
             Price existingPrice = it->first;
             if (newOrder.getOrderType() == OrderType::Limit && *newOrder.getLimitPrice() < existingPrice)
                 break;                                                                                    ///aici era checkfill ul
@@ -92,15 +94,27 @@ std::vector<ResponseEvent> OrderBook::processAddOrder(const Order& order, Timest
             BookLevel& level = it->second;
             auto ordIt = level.orders.begin();
 
-            while (newOrder.getQuantity() > 0 && ordIt != level.orders.end()) {
+            while (newOrder.getQuantity() > 0 && ordIt != level.orders.end() && !cashExhausted) {
                 Order& existing = *ordIt;
                 Quantity qty = std::min(newOrder.getQuantity(), existing.getQuantity());
+
+                if (newOrder.isOwn()) {
+                    Quantity affordableQty = static_cast<Quantity>(remainingCash / existingPrice);
+                    if (affordableQty == 0) {
+                        cashExhausted = true;
+                        break;
+                    }
+                    qty = std::min(qty, affordableQty);
+                }
 
                 recordTrade(newOrder, existing, existingPrice, qty, currentTime, responseEvents);
 
                 newOrder.setQuantity(newOrder.getQuantity() - qty);
                 existing.setQuantity(existing.getQuantity() - qty);
                 level.totalQuantity -= qty;
+
+                if (newOrder.isOwn())
+                    remainingCash -= qty * existingPrice;
 
                 if (existing.getQuantity() == 0) {
                     m_activeOrders.erase(existing.getOrderId());
@@ -116,6 +130,8 @@ std::vector<ResponseEvent> OrderBook::processAddOrder(const Order& order, Timest
     else { ///Side::Sell
         auto& levels = m_bids;
         auto it = levels.begin();
+        Cash remainingCash = availableCash;
+
         while (newOrder.getQuantity() > 0 && it != levels.end()) {
             Price existingPrice = it->first;
             if (newOrder.getOrderType() == OrderType::Limit && *newOrder.getLimitPrice() > existingPrice)
@@ -128,11 +144,24 @@ std::vector<ResponseEvent> OrderBook::processAddOrder(const Order& order, Timest
                 Order& existing = *ordIt;
                 Quantity qty = std::min(newOrder.getQuantity(), existing.getQuantity());
 
+                if (existing.isOwn()) {
+                    Quantity affordableQty = static_cast<Quantity>(remainingCash / existingPrice);
+                    qty = std::min(qty, affordableQty);
+
+                    if (qty == 0) {
+                        ++ordIt;
+                        continue;
+                    }
+                }
+
                 recordTrade(newOrder, existing, existingPrice, qty, currentTime, responseEvents);
 
                 newOrder.setQuantity(newOrder.getQuantity() - qty);
                 existing.setQuantity(existing.getQuantity() - qty);
                 level.totalQuantity -= qty;
+
+                if (existing.isOwn())
+                    remainingCash -= qty * existingPrice;
 
                 if (existing.getQuantity() == 0) {
                     m_activeOrders.erase(existing.getOrderId());
@@ -162,9 +191,9 @@ std::vector<ResponseEvent> OrderBook::processAddOrder(const Order& order, Timest
             m_activeOrders[newOrder.getOrderId()] = OrderLocation{Side::Sell, *newOrder.getLimitPrice(), &level, it};
         }
 
-        responseEvents.push_back({ResponseType::Accepted, newOrder.getOrderId(), m_symbol, currentTime,
+        responseEvents.push_back({ResponseType::Resting, newOrder.getOrderId(), m_symbol, currentTime,
                                    newOrder.getOrderSide(), newOrder.isOwn()});
-        ///responseEvent Accepted - restul din newOrder(limit) a fost adaugat in OrderBook
+        ///responseEvent Resting - restul din newOrder(limit) a fost adaugat in OrderBook
     }
 
     return responseEvents;
@@ -190,7 +219,8 @@ ResponseEvent OrderBook::processCancelOrder(OrderId id, Timestamp currentTime) {
 }
 
 std::vector<ResponseEvent> OrderBook::processModifyOrder(OrderId id, Quantity newQty,
-                                                            std::optional<Price> newPrice, Timestamp currentTime) {
+                                                            std::optional<Price> newPrice,
+                                                            Cash availableCash, Timestamp currentTime) {
     std::vector<ResponseEvent> responses;
 
     auto it = m_activeOrders.find(id);
@@ -213,7 +243,7 @@ std::vector<ResponseEvent> OrderBook::processModifyOrder(OrderId id, Quantity ne
                       newPrice.has_value() ? newPrice : original.getLimitPrice(),
                       original.isOwn()};
 
-    auto addResults = processAddOrder(modifiedOrder, currentTime);
+    auto addResults = processAddOrder(modifiedOrder, availableCash, currentTime);
 
     responses.push_back({ResponseType::Modified, id, m_symbol, currentTime, modifiedOrder.getOrderSide(), true});
     responses.insert(responses.end(), addResults.begin(), addResults.end());

@@ -30,7 +30,7 @@ void Portfolio::applyFill(const Fill &fill) {
     Position oldQuantity = pos.quantity;
     pos.quantity += signedQty;
 
-    bool flipped = (oldQuantity * pos.quantity < 0) && pos.quantity != 0;
+    bool flipped = (oldQuantity * pos.quantity < 0);
     ///putem fie sa ramanem flat, fie sa trecem de la long la short sau invers, avgEntryPrice este price ul actual
     if (flipped)
         pos.avgEntryPrice = price;
@@ -54,3 +54,26 @@ Position Portfolio::getPosition(const Symbol& symbol) const {
     return (it != m_positions.end()) ? it->second.quantity : Position{};
 }
 
+
+void Portfolio::liquidate(const std::unordered_map<Symbol, OrderBook>& books) {
+    for (const auto& [symbol, position]: m_positions) {
+        if (position.quantity == 0)
+            continue;
+
+        auto it = books.find(symbol);
+        if (it == books.end())
+            continue;
+
+        bool isLong = position.quantity > 0;
+        Price exitPrice = isLong ? it->second.getBestBid() : it->second.getBestAsk();
+
+        if (exitPrice == 0 && !it->second.getMarkPrice())
+            continue;
+
+        if (exitPrice == 0 && it->second.getMarkPrice())
+            exitPrice = it->second.getMarkPrice();
+
+        Quantity qt = std::abs(position.quantity);
+        applyFill(Fill{symbol, Timestamp{}, OrderId{}, isLong ? Side::Sell : Side::Buy, qt, exitPrice});
+    }
+}

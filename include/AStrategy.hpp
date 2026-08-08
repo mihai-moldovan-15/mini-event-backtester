@@ -4,7 +4,7 @@
 
 class AStrategy : public Strategy {
 public:
-    std::vector<std::unique_ptr<Event>> onTime
+    std::optional<std::vector<std::unique_ptr<Event>>> onTime
     (Timestamp ts,
     const std::unordered_map<Symbol, OrderBook>& orderBooks,
     const Portfolio& portfolio,
