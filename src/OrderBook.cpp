@@ -18,8 +18,8 @@ void OrderBook::validate() const {
             throw std::logic_error("Bid level has non-positive quantity at " + std::to_string(price));
 
         Quantity sum{};
-        for (const auto& order: level.orders)
-            sum += order.getQuantity();
+        for (auto it = level.orders.getHead(); it != nullptr; it=it->next)
+            sum += it->value.getQuantity();
 
         if (sum != level.totalQuantity)
             throw std::logic_error("Bid level totalQuantity mismatch at price " + std::to_string(price));
@@ -33,8 +33,8 @@ void OrderBook::validate() const {
             throw std::logic_error("Ask level has non-positive quantity at " + std::to_string(price));
 
         Quantity sum{};
-        for (const auto& order: level.orders)
-            sum += order.getQuantity();
+        for (auto it = level.orders.getHead(); it != nullptr; it=it->next)
+            sum += it->value.getQuantity();
 
         if (sum != level.totalQuantity)
             throw std::logic_error("Ask level totalQuantity mismatch at price " + std::to_string(price));
@@ -92,10 +92,10 @@ std::vector<ResponseEvent> OrderBook::processAddOrder(const Order& order, Cash a
                 break;                                                                                    ///aici era checkfill ul
 
             BookLevel& level = it->second;
-            auto ordIt = level.orders.begin();
+            auto ordIt = level.orders.getHead();
 
-            while (newOrder.getQuantity() > 0 && ordIt != level.orders.end() && !cashExhausted) {
-                Order& existing = *ordIt;
+            while (newOrder.getQuantity() > 0 && ordIt != nullptr && !cashExhausted) {
+                Order& existing = ordIt->value;
                 Quantity qty = std::min(newOrder.getQuantity(), existing.getQuantity());
 
                 if (newOrder.isOwn()) {
@@ -121,7 +121,7 @@ std::vector<ResponseEvent> OrderBook::processAddOrder(const Order& order, Cash a
                     ordIt = level.orders.erase(ordIt);
                 }
                 else
-                    ++ordIt;
+                    ordIt = ordIt->next;
             }
 
             it = level.orders.empty() ? levels.erase(it) : std::next(it);
@@ -138,10 +138,10 @@ std::vector<ResponseEvent> OrderBook::processAddOrder(const Order& order, Cash a
                 break;
 
             BookLevel& level = it->second;
-            auto ordIt = level.orders.begin();
+            auto ordIt = level.orders.getHead();
 
-            while (newOrder.getQuantity() > 0 && ordIt != level.orders.end()) {
-                Order& existing = *ordIt;
+            while (newOrder.getQuantity() > 0 && ordIt != nullptr) {
+                Order& existing = ordIt->value;
                 Quantity qty = std::min(newOrder.getQuantity(), existing.getQuantity());
 
                 if (existing.isOwn()) {
@@ -149,7 +149,7 @@ std::vector<ResponseEvent> OrderBook::processAddOrder(const Order& order, Cash a
                     qty = std::min(qty, affordableQty);
 
                     if (qty == 0) {
-                        ++ordIt;
+                        ordIt = ordIt->next;
                         continue;
                     }
                 }
@@ -168,7 +168,7 @@ std::vector<ResponseEvent> OrderBook::processAddOrder(const Order& order, Cash a
                     ordIt = level.orders.erase(ordIt);
                 }
                 else
-                    ++ordIt;
+                    ordIt = ordIt->next;
             }
 
             it = level.orders.empty() ? levels.erase(it) : std::next(it);
@@ -177,18 +177,20 @@ std::vector<ResponseEvent> OrderBook::processAddOrder(const Order& order, Cash a
 
     if (newOrder.getQuantity() > 0 && newOrder.getOrderType() == OrderType::Limit) {
         if (newOrder.getOrderSide() == Side::Buy) {
-            BookLevel& level = m_bids[*newOrder.getLimitPrice()];
+            auto [it, _] = m_bids.try_emplace(*newOrder.getLimitPrice(), &m_pool);
+            BookLevel& level = it->second;
             level.orders.push_back(newOrder);
             level.totalQuantity += newOrder.getQuantity();
-            auto it = std::prev(level.orders.end());
-            m_activeOrders[newOrder.getOrderId()] = OrderLocation{Side::Buy, *newOrder.getLimitPrice(), &level, it};
+            auto newOrd = level.orders.getTail();
+            m_activeOrders[newOrder.getOrderId()] = OrderLocation{Side::Buy, *newOrder.getLimitPrice(), &level, newOrd};
         }
         else {
-            BookLevel& level = m_asks[*newOrder.getLimitPrice()];
+            auto [it, _] = m_asks.try_emplace(*newOrder.getLimitPrice(), &m_pool);
+            BookLevel& level = it->second;
             level.orders.push_back(newOrder);
             level.totalQuantity += newOrder.getQuantity();
-            auto it = std::prev(level.orders.end());
-            m_activeOrders[newOrder.getOrderId()] = OrderLocation{Side::Sell, *newOrder.getLimitPrice(), &level, it};
+            auto newOrd = level.orders.getTail();
+            m_activeOrders[newOrder.getOrderId()] = OrderLocation{Side::Sell, *newOrder.getLimitPrice(), &level, newOrd};
         }
 
         responseEvents.push_back({ResponseType::Resting, newOrder.getOrderId(), m_symbol, currentTime,
@@ -205,7 +207,7 @@ ResponseEvent OrderBook::processCancelOrder(OrderId id, Timestamp currentTime) {
         return { ResponseType::CancelFailed, id, m_symbol, currentTime, Side{}, true };
 
     OrderLocation& loc = it->second;
-    Order& order = *loc.it;
+    Order& order = loc.it->value;
     Side side = order.getOrderSide();
 
     loc.level->totalQuantity -= order.getQuantity();
@@ -234,7 +236,7 @@ std::vector<ResponseEvent> OrderBook::processModifyOrder(OrderId id, Quantity ne
         return responses;
     }
 
-    Order original = *it->second.it;
+    Order original = it->second.it->value;
 
     processCancelOrder(id, currentTime);
 

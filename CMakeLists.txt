@@ -13,6 +13,7 @@ add_executable(mini_event_backtester
         src/Simulator.cpp
         src/Event.cpp
         src/AStrategy.cpp
+        "data structures/double_linked_list.hpp"
 )
 
 target_include_directories(mini_event_backtester PRIVATE include)

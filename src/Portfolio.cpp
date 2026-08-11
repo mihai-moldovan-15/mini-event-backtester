@@ -54,7 +54,6 @@ Position Portfolio::getPosition(const Symbol& symbol) const {
     return (it != m_positions.end()) ? it->second.quantity : Position{};
 }
 
-
 void Portfolio::liquidate(const std::unordered_map<Symbol, OrderBook>& books) {
     for (const auto& [symbol, position]: m_positions) {
         if (position.quantity == 0)

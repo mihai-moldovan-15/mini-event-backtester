@@ -1,6 +1,5 @@
 #pragma once
 #include "Types.hpp"
-#include <list>
 #include <unordered_map>
 #include <map>
 #include "Order.hpp"
@@ -9,9 +8,12 @@
 #include <optional>
 #include <functional>///pentru std::greater<>
 
+#include "../data structures/double_linked_list.hpp"
+
 struct BookLevel {
-    std::list<Order> orders{};
+    List<Order> orders;
     Quantity totalQuantity{};
+    explicit BookLevel(NodePool<Order>* pool) : orders(pool) {}
 };
 
 class OrderBook {
@@ -20,9 +22,10 @@ private:
         Side side;
         Price price;
         BookLevel* level;
-        std::list<Order>::iterator it;
+        ListNode<Order>* it;
     };
     Symbol m_symbol{};
+    NodePool<Order> m_pool{};
     std::map<Price, BookLevel> m_asks;
     std::map<Price, BookLevel, std::greater<>> m_bids;
     std::unordered_map<OrderId, OrderLocation> m_activeOrders{};

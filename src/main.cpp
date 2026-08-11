@@ -6,10 +6,8 @@ int main() {
 
     Simulator S(std::make_unique<AStrategy>(strategy), 1'000'000, 21'000'000'000);
     S.loadHistoricalEvents("../data/historical_events.txt");
-
+    S.scheduleTimer();
     S.run();
-
-    S.getOrderBook("ABC").validate();
 
     std::cout << "Fills:\n";
     for (const Fill& f : S.getFillsRecord())
