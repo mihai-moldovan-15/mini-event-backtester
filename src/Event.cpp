@@ -2,7 +2,7 @@
 #include "Simulator.hpp"
 #include "OrderBook.hpp"
 
-void AddOrderEvent::execute(Simulator &simulator) {
+void AddPersonalOrderEvent::execute(Simulator &simulator) {
     auto& book = simulator.getOrderBook(m_order.getSymbol());
     auto responses = book.processAddOrder(m_order, simulator.getPortfolio().getAvailableCash(), simulator.getCurrTimeStamp());
 
@@ -11,17 +11,34 @@ void AddOrderEvent::execute(Simulator &simulator) {
             simulator.getCurrTimeStamp() + simulator.getReturnLatency(), std::move(response)));
 }
 
-void CancelOrderEvent::execute(Simulator& simulator) {
+void CancelPersonalOrderEvent::execute(Simulator& simulator) {
     auto& book = simulator.getOrderBookForOrder(m_orderId);
-    auto response = book.processCancelOrder(m_orderId, simulator.getCurrTimeStamp());
+    auto response = book.processCancelOrder(m_orderId, simulator.getCurrTimeStamp(), true);
     simulator.scheduleEvent(std::make_unique<MarketReturnEvent>(
             simulator.getCurrTimeStamp() + simulator.getReturnLatency(), std::move(response)));
 }
 
-void ModifyOrderEvent::execute(Simulator& simulator) {
+void CancelHistoricalOrderEvent::execute(Simulator& simulator) {
+    auto& book = simulator.getOrderBook(m_symbol);
+    auto response = book.processCancelOrder(m_orderId, simulator.getCurrTimeStamp(), false);
+    simulator.scheduleEvent(std::make_unique<MarketReturnEvent>(
+        simulator.getCurrTimeStamp() + simulator.getReturnLatency(), std::move(response)));
+}
+
+void ModifyPersonalOrderEvent::execute(Simulator& simulator) {
     auto& book = simulator.getOrderBookForOrder(m_orderId);
     auto responses = book.processModifyOrder(m_orderId, m_newQuantity, m_newLimitPrice,
-                                              simulator.getPortfolio().getAvailableCash(), simulator.getCurrTimeStamp());
+                                              simulator.getPortfolio().getAvailableCash(), simulator.getCurrTimeStamp(), true);
+    for (auto& response : responses)
+        simulator.scheduleEvent(std::make_unique<MarketReturnEvent>(
+            simulator.getCurrTimeStamp() + simulator.getReturnLatency(), std::move(response)));
+}
+
+void ModifyHistoricalOrderEvent::execute(Simulator& simulator) {
+    auto& book = simulator.getOrderBook(m_symbol);
+    ///availableCash conteaza si aici: re-add ul poate lovi ordinele noastre rezidente
+    auto responses = book.processModifyOrder(m_orderId, m_newQuantity, m_newLimitPrice,
+                                              simulator.getPortfolio().getAvailableCash(), simulator.getCurrTimeStamp(), false);
     for (auto& response : responses)
         simulator.scheduleEvent(std::make_unique<MarketReturnEvent>(
             simulator.getCurrTimeStamp() + simulator.getReturnLatency(), std::move(response)));

@@ -15,7 +15,7 @@ private:
     Timestamp m_currentTime{};
     const Timestamp m_sendLatency{ 3'000'000 };
     const Timestamp m_returnLatency{ 3'000'000 };
-    const Timestamp m_timeDelta{ 2'000'000 };
+    const Timestamp m_timeDelta{ 3'000'000 };
     Timestamp m_endTime{ 21'000'000'000 };
     Portfolio m_portfolio;
     std::unordered_map<Symbol, OrderBook> m_orderBooks{};

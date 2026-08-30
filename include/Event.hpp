@@ -4,6 +4,7 @@
 #include "ResponseEvent.hpp"
 #include <memory>
 #include <optional>
+#include <utility>
 
 class Simulator;
 class Event {
@@ -15,8 +16,8 @@ public:
     Event(Timestamp sentTs, SequenceNumber sqNum = ++m_nextSqNum): m_sentTs(sentTs), m_sqNum(sqNum) {}
     Event(const Event&) = delete; ///Event e abstract class, can t instantiate an Event object
     Event& operator=(const Event&) = delete;///same logic
-    Timestamp getTimeStamp() const { return m_sentTs; }
-    SequenceNumber getSequenceNumber() const { return m_sqNum; }///tot timpul voi procesa evenimentele istorice inaintea celor
+    [[nodiscard]] Timestamp getTimeStamp() const { return m_sentTs; }
+    [[nodiscard]] SequenceNumber getSequenceNumber() const { return m_sqNum; }///tot timpul voi procesa evenimentele istorice inaintea celor
                                                                 ///celor personale
     void addLatency(Timestamp latency) { m_sentTs += latency; }
 
@@ -30,30 +31,53 @@ public:
     void execute(Simulator& simulator) override;
 };
 
-class AddOrderEvent: public Event{
+class AddPersonalOrderEvent: public Event{
 private:
     Order m_order;
 public:
-    AddOrderEvent(Timestamp sentTs, Order order): Event(sentTs), m_order(std::move(order)) {}
+    AddPersonalOrderEvent(Timestamp sentTs, Order order): Event(sentTs), m_order(std::move(order)) {}
     void execute(Simulator& simulator) override;
 };
 
-class CancelOrderEvent: public Event {
+class CancelPersonalOrderEvent: public Event {
 private:
     OrderId m_orderId{};
 public:
-    CancelOrderEvent(Timestamp sentTs, OrderId orderId): Event(sentTs), m_orderId(orderId) {}
+    CancelPersonalOrderEvent(Timestamp sentTs, OrderId orderId): Event(sentTs), m_orderId(orderId) {}
     void execute(Simulator& simulator) override;
 };
 
-class ModifyOrderEvent: public Event {
+class CancelHistoricalOrderEvent: public Event {
+private:
+    OrderId m_orderId{};
+    Symbol m_symbol{};
+public:
+    CancelHistoricalOrderEvent(Timestamp sentTs, OrderId orderId, Symbol symbol):
+    Event(sentTs), m_orderId(orderId), m_symbol(std::move(symbol)) {}
+
+    void execute(Simulator &) override;
+};
+
+class ModifyPersonalOrderEvent: public Event {
 private:
     OrderId m_orderId{};
     Quantity m_newQuantity{};
     std::optional<Price> m_newLimitPrice{};
 public:
-    ModifyOrderEvent(Timestamp sentTs, OrderId id, Quantity q, std::optional<Price> p)
+    ModifyPersonalOrderEvent(Timestamp sentTs, OrderId id, Quantity q, std::optional<Price> p)
         : Event(sentTs), m_orderId(id), m_newQuantity(q), m_newLimitPrice(p) {}
+    void execute(Simulator& s) override;
+};
+
+class ModifyHistoricalOrderEvent: public Event {
+private:
+    OrderId m_orderId{};
+    Quantity m_newQuantity{};
+    std::optional<Price> m_newLimitPrice{};
+    Symbol m_symbol{};
+public:
+    ModifyHistoricalOrderEvent(Timestamp sentTs, OrderId id, Quantity q, std::optional<Price> p, Symbol symbol)
+        : Event(sentTs), m_orderId(id), m_newQuantity(q), m_newLimitPrice(p), m_symbol(std::move(symbol)) {}
     void execute(Simulator& s) override;
 };
 

@@ -5,6 +5,7 @@
 #include "Types.hpp"
 #include <vector>
 #include <memory>
+
 template<typename T>
 struct ListNode {
     T value{};
@@ -52,6 +53,7 @@ public:
     }
 
     void deallocate(ListNode<T>* node) {
+        node->prev = nullptr;
         node->next = m_freeHead;
         m_freeHead = node;
     }
@@ -74,17 +76,21 @@ public:
         other.m_size = 0;
     }
     List& operator=(List&& other) noexcept {
+        if (this == &other)
+            return *this;
+
         m_head = other.m_head;
         m_tail = other.m_tail;
         m_pool = other.m_pool;
         m_size = other.m_size;
 
         other.m_head = other.m_tail = nullptr;
-        m_pool = nullptr;
+        other.m_pool = nullptr;
         other.m_size = 0;
 
         return *this;
     }
+
     ~List();
 
     [[nodiscard]] size_t size() const;

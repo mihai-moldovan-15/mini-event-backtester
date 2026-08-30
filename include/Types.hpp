@@ -13,6 +13,7 @@ using OrderId = std::int64_t;
 using Quantity = std::int32_t;
 using Symbol = std::string;
 using SymbolView = std::string_view;
+using SizeValue = size_t;
 
 enum class Side {
     Buy,

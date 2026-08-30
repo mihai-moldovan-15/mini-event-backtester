@@ -21,6 +21,7 @@ private:
           std::optional<Price> limitPrice, bool isOwn);
 
     friend class OrderBook;
+    friend class Simulator;
 public:
     Order() = default;
     Order(SymbolView symbol, Timestamp ts, Side side, Quantity quantity, OrderType type,

@@ -4,6 +4,8 @@
 #include <fstream>
 #include <memory>
 #include <chrono>
+#include <sstream>
+#include <stdexcept>
 #include "Types.hpp"
 #include "Event.hpp"
 
@@ -47,7 +49,7 @@ void Simulator::cancelAllOpenOrders() {
         auto it = m_OrderIdToSymbol.find(id);
         if (it == m_OrderIdToSymbol.end())
             continue;
-        auto response = m_orderBooks.at(it->second).processCancelOrder(id, m_currentTime);
+        auto response = m_orderBooks.at(it->second).processCancelOrder(id, m_currentTime, true);
         handleResponse(response);
     }
 }
@@ -76,13 +78,78 @@ void Simulator::loadHistoricalEvents(const std::filesystem::path& dataFile) {
     if (!in)
         throw std::runtime_error("Could not open file " + dataFile.string());
 
-    Order order;
-    while (in >> order) {
-        if (order.getQuantity() <= 0)
+    ///ts action orderId ownerId SIDE quantity price
+    const Symbol symbol{"AAA"};
+    constexpr Timestamp tsScale{1'000'000};///ts-urile din fisier sunt tickuri, motorul lucreaza in ns: 1 tick = 1ms
+    std::unordered_map<OrderId, Symbol> histSymbols;///doar la load: CANCEL/MODIFY nu au simbol pe linie
+    OrderId maxHistId{};
+
+    std::string line;
+    SizeValue lineNumber{};
+
+    while (std::getline(in, line)) {
+        ++lineNumber;
+        if (line.empty() || line.front() == '#')
             continue;
-        m_historicalEvents.push_back(std::make_unique<AddOrderEvent>(order.getTimeStamp(), order));
-        addBook(order.getSymbol());
+
+        std::istringstream stream(line);
+        Timestamp ts{};
+        std::string actionText, sideText;
+        OrderId orderId{};
+        OrderId ownerId{};
+        Quantity quantity{};
+        Price price{};
+
+        const auto lineInfo = [&] { return " on line " + std::to_string(lineNumber) + " of " + dataFile.string(); };
+
+        if (!(stream >> ts >> actionText >> orderId >> ownerId >> sideText >> quantity >> price))
+            throw std::invalid_argument("Malformed event" + lineInfo());
+
+        ts *= tsScale;
+
+        std::ranges::transform(actionText, actionText.begin(), ::toupper);
+        std::ranges::transform(sideText, sideText.begin(), ::toupper);
+
+        Side side{};
+        if (sideText == "BUY")
+            side = Side::Buy;
+        else if (sideText == "SELL")
+            side = Side::Sell;
+        else
+            throw std::invalid_argument("Invalid side " + sideText + lineInfo());
+
+        maxHistId = std::max(maxHistId, orderId);
+
+        if (actionText == "ADD") {
+            if (quantity <= 0)
+                continue;
+
+            addBook(symbol);
+            histSymbols[orderId] = symbol;
+            m_historicalEvents.push_back(std::make_unique<AddPersonalOrderEvent>(ts,
+                        Order{orderId, symbol, ts, side, quantity, OrderType::Limit, price, false}));
+        }
+        else if (actionText == "CANCEL") {
+            auto it = histSymbols.find(orderId);
+            if (it == histSymbols.end())
+                continue;
+
+            m_historicalEvents.push_back(std::make_unique<CancelHistoricalOrderEvent>(ts, orderId, it->second));
+            histSymbols.erase(it);
+        }
+        else if (actionText == "MODIFY") {
+            auto it = histSymbols.find(orderId);
+            if (it == histSymbols.end())
+                continue;
+
+            m_historicalEvents.push_back(std::make_unique<ModifyHistoricalOrderEvent>(ts, orderId, quantity,
+                                                                                      price, it->second));
+        }
+        else
+            throw std::invalid_argument("Invalid action " + actionText + lineInfo());
     }
+
+    Order::m_nextId = std::max(Order::m_nextId, maxHistId);
 
     std::ranges::stable_sort(m_historicalEvents,
                 [](const auto& a, const auto& b) { return a->getTimeStamp() < b->getTimeStamp(); });

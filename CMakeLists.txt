@@ -17,3 +17,12 @@ add_executable(mini_event_backtester
 )
 
 target_include_directories(mini_event_backtester PRIVATE include)
+
+# Harness de validare a OrderBook-ului contra datelor LOBSTER
+add_executable(lobster_diff
+        tools/lobster_diff.cpp
+        src/Order.cpp
+        src/OrderBook.cpp
+)
+
+target_include_directories(lobster_diff PRIVATE include)

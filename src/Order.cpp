@@ -1,4 +1,7 @@
 #include "Order.hpp"
+
+#include <algorithm>
+
 #include "Types.hpp"
 #include <stdexcept>
 #include <optional>
@@ -47,21 +50,23 @@ std::ostream& operator<<(std::ostream& out, const Order& order) {
 }
 
 std::istream& operator>>(std::istream& in, Order& order) {
-    Symbol symbol{};
-    in >> symbol;
-
-    if (in.eof())
-        return in;
+    const Symbol symbol{"AAA"};/// momentan exista un singur simbol
+    //in >> symbol;
 
     Timestamp ts{};
     in >> ts;
 
+    if (in.eof())
+        return in;
+
     Side side = [&]() {
         std::string s;
         in >> s;
-        if (s == "Buy")
+        std::ranges::transform(s, s.begin(), ::toupper);
+
+        if (s == "BUY")
             return Side::Buy;
-        if (s == "Sell")
+        if (s == "SELL")
             return Side::Sell;
 
         throw std::invalid_argument("Invalid side " + s);
@@ -73,9 +78,10 @@ std::istream& operator>>(std::istream& in, Order& order) {
     OrderType type = [&]() {
         std::string s;
         in >> s;
-        if (s == "Limit")
+        std::ranges::transform(s, s.begin(), ::toupper);
+        if (s == "LIMIT")
             return OrderType::Limit;
-        if (s == "Market")
+        if (s == "MARKET")
             return OrderType::Market;
 
         throw std::invalid_argument("Invalid order type " + s);

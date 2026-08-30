@@ -25,34 +25,43 @@ private:
         ListNode<Order>* it;
     };
     Symbol m_symbol{};
+    SizeValue m_relevantLevelCount{};
     NodePool<Order> m_pool{};
-    std::map<Price, BookLevel> m_asks;
-    std::map<Price, BookLevel, std::greater<>> m_bids;
-    std::unordered_map<OrderId, OrderLocation> m_activeOrders{};
-    void removeLevel(Side side, Price price) { (side == Side::Buy) ? m_bids.erase(price) : m_asks.erase(price); }
-public:
-    explicit OrderBook(SymbolView symbol): m_symbol(symbol) {}
 
-    OrderBook(const OrderBook&) = delete;                          //BookLevel* level;
-    OrderBook& operator=(const OrderBook&) = delete;               //BookLevel* level;
+    std::map<Price, BookLevel> m_relevantAsks;
+    std::map<Price, BookLevel> m_otherAsks;
+    std::map<Price, BookLevel, std::greater<>> m_relevantBids;
+    std::map<Price, BookLevel, std::greater<>> m_otherBids;
+
+    std::unordered_map<OrderId, OrderLocation> m_activeOrders{};
+    void removeRelevantLevel(Side side, Price price) { (side == Side::Buy) ? m_relevantBids.erase(price) : m_relevantAsks.erase(price); }
+    void removeOtherLevel(Side side, Price price) { (side == Side::Buy) ? m_otherBids.erase(price) : m_otherAsks.erase(price); }
+    void rebalanceLevels();
+public:
+    explicit OrderBook(const SymbolView symbol, SizeValue relevantLevelCount = 10): m_symbol(symbol), m_relevantLevelCount(relevantLevelCount){}
+
+    OrderBook(const OrderBook&) = delete;
+    OrderBook& operator=(const OrderBook&) = delete;
     OrderBook(OrderBook&&) = default;
     OrderBook& operator=(OrderBook&&) = default;
 
-    Price getBestAsk() const { return (m_asks.empty()) ? 0: m_asks.begin()->first; }
-    Price getBestBid() const { return (m_bids.empty()) ? 0: m_bids.begin()->first; }
-    const auto& getAsks() const { return m_asks; }
-    const auto& getBids() const { return m_bids; }
+    ///verif doar bestAsks/bestBids, nu ar trebui ca relevantAsks sa fie gol si otherAsks sa contina elemente
+    Price getBestAsk() const { return (m_relevantAsks.empty()) ? 0: m_relevantAsks.begin()->first; }
+    Price getBestBid() const { return (m_relevantBids.empty()) ? 0: m_relevantBids.begin()->first; }
+
+    const auto& getRelevantAsks() const { return m_relevantAsks; }
+    const auto& getRelevantBids() const { return m_relevantBids; }
     const Symbol& getSymbol() const { return m_symbol; }
 
     //bool checkFill(const Order& order);///fac verificarea direct in processAddOrder
 
     void recordTrade(const Order& incoming, const Order& existing, Price price, Quantity qty,
-                             Timestamp currentTime, std::vector<ResponseEvent>& responses);
+                             Timestamp currentTime, std::vector<ResponseEvent>& responses) const;
     /// adaugarea efectiva in book, procesarea eventurilor, intorc response events
     std::vector<ResponseEvent> processAddOrder(const Order& order, Cash availableCash, Timestamp currentTime); ///aici se intampla crossingul, poate genera mai multe responseuri
-    ResponseEvent processCancelOrder(OrderId orderid, Timestamp currentTime);
+    ResponseEvent processCancelOrder(OrderId orderid, Timestamp currentTime, bool isOwnRequest);
     std::vector<ResponseEvent> processModifyOrder(OrderId id, Quantity newQty, std::optional<Price> newPrice,
-                                                   Cash availableCash, Timestamp currentTime);///add ul poate genera mai multe responseuri
+                                                   Cash availableCash, Timestamp currentTime, bool isOwnRequest);///add ul poate genera mai multe responseuri
 
     Price getMarkPrice() const;
     Price getSpread() const;
