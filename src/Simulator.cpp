@@ -9,8 +9,27 @@
 #include "Types.hpp"
 #include "Event.hpp"
 
+void Simulator::sampleEquity() {
+    ///getMarkPrice arunca pe o carte complet goala, asa ca sarim peste esantioanele in care
+    ///vreun simbol nu are inca niciun pret
+    for (const auto& [symbol, book] : m_orderBooks)
+        if (book.getBestBid() == 0 && book.getBestAsk() == 0)
+            return;
+
+    const Cash equity = m_portfolio.getEquity(m_orderBooks);
+    m_minEquity = std::min(m_minEquity, equity);
+    m_maxEquity = std::max(m_maxEquity, equity);
+}
+
+Position Simulator::getFinalPosition(const Symbol& symbol) const {
+    auto it = m_finalPositions.find(symbol);
+    return (it != m_finalPositions.end()) ? it->second : Position{};
+}
+
 void Simulator::run() {
     size_t histIdx = 0;
+
+    m_minEquity = m_maxEquity = m_portfolio.getAvailableCash();
 
     while (histIdx < m_historicalEvents.size() || !m_personalEvents.empty()) {
         bool histAvailable = histIdx < m_historicalEvents.size();
@@ -33,7 +52,12 @@ void Simulator::run() {
             m_personalEvents.pop();
             event->execute(*this);
         }
+
+        sampleEquity();
     }
+
+    for (const auto& [symbol, _] : m_orderBooks)
+        m_finalPositions[symbol] = m_portfolio.getPosition(symbol);
 
     m_portfolio.liquidate(m_orderBooks);
     cancelAllOpenOrders();
@@ -80,8 +104,8 @@ void Simulator::loadHistoricalEvents(const std::filesystem::path& dataFile) {
 
     ///ts action orderId ownerId SIDE quantity price
     const Symbol symbol{"AAA"};
-    constexpr Timestamp tsScale{1'000'000};///ts-urile din fisier sunt tickuri, motorul lucreaza in ns: 1 tick = 1ms
-    std::unordered_map<OrderId, Symbol> histSymbols;///doar la load: CANCEL/MODIFY nu au simbol pe linie
+    constexpr Timestamp tsScale{10'000'000};///ts urile din fisier sunt tickuri, motorul lucreaza in ns: 1 tick = 10ms
+    std::unordered_map<OrderId, Symbol> histSymbols;
     OrderId maxHistId{};
 
     std::string line;
@@ -149,6 +173,7 @@ void Simulator::loadHistoricalEvents(const std::filesystem::path& dataFile) {
             throw std::invalid_argument("Invalid action " + actionText + lineInfo());
     }
 
+    m_historicalRows = lineNumber;
     Order::m_nextId = std::max(Order::m_nextId, maxHistId);
 
     std::ranges::stable_sort(m_historicalEvents,

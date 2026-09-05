@@ -132,7 +132,8 @@ void OrderBook::recordTrade(const Order& incoming, const Order& existing, Price 
                                .isOwn = existing.isOwn(), .fillQty = qty ,.fillPrice = price} );
 }
 
-std::vector<ResponseEvent> OrderBook::processAddOrder(const Order& order, Cash availableCash, const Timestamp currentTime) {
+std::vector<ResponseEvent> OrderBook::processAddOrder(const Order& order, Cash availableCash, const Timestamp currentTime,
+                                                      Price commissionPerShare) {
     Order newOrder = order;
     std::vector<ResponseEvent> responseEvents{};
 
@@ -158,7 +159,9 @@ std::vector<ResponseEvent> OrderBook::processAddOrder(const Order& order, Cash a
                 Quantity qty = std::min(newOrder.getQuantity(), existing.getQuantity());
 
                 if (newOrder.isOwn()) {
-                    auto affordableQty = static_cast<Quantity>(remainingCash / existingPrice);
+                    ///cumparam noi, deci platim si comisionul pe fiecare actiune
+                    const Cash costPerShare = existingPrice + commissionPerShare;
+                    auto affordableQty = static_cast<Quantity>(remainingCash / costPerShare);
                     if (affordableQty == 0) {
                         cashExhausted = true;
                         break;
@@ -173,7 +176,7 @@ std::vector<ResponseEvent> OrderBook::processAddOrder(const Order& order, Cash a
                 level.totalQuantity -= qty;
 
                 if (newOrder.isOwn())
-                    remainingCash -= qty * existingPrice;
+                    remainingCash -= qty * (existingPrice + commissionPerShare);
 
                 if (existing.getQuantity() == 0) {
                     m_activeOrders.erase(existing.getOrderId());
@@ -214,7 +217,9 @@ std::vector<ResponseEvent> OrderBook::processAddOrder(const Order& order, Cash a
                 Quantity qty = std::min(newOrder.getQuantity(), existing.getQuantity());
 
                 if (existing.isOwn()) {
-                    auto affordableQty = static_cast<Quantity>(remainingCash / existingPrice);
+                    ///bidul nostru rezident e lovit, deci noi cumparam si platim comisionul
+                    const Cash costPerShare = existingPrice + commissionPerShare;
+                    auto affordableQty = static_cast<Quantity>(remainingCash / costPerShare);
                     qty = std::min(qty, affordableQty);
 
                     if (qty == 0) {
@@ -230,7 +235,7 @@ std::vector<ResponseEvent> OrderBook::processAddOrder(const Order& order, Cash a
                 level.totalQuantity -= qty;
 
                 if (existing.isOwn())
-                    remainingCash -= qty * existingPrice;
+                    remainingCash -= qty * (existingPrice + commissionPerShare);
 
                 if (existing.getQuantity() == 0) {
                     m_activeOrders.erase(existing.getOrderId());
@@ -315,7 +320,7 @@ ResponseEvent OrderBook::processCancelOrder(OrderId id, Timestamp currentTime, b
 std::vector<ResponseEvent> OrderBook::processModifyOrder(OrderId id, Quantity newQty,
                                                             std::optional<Price> newPrice,
                                                             Cash availableCash, Timestamp currentTime,
-                                                            bool isOwnRequest) {
+                                                            bool isOwnRequest, Price commissionPerShare) {
     std::vector<ResponseEvent> responses;
 
     auto it = m_activeOrders.find(id);
@@ -339,7 +344,7 @@ std::vector<ResponseEvent> OrderBook::processModifyOrder(OrderId id, Quantity ne
                       newPrice.has_value() ? newPrice : original.getLimitPrice(),
                       original.isOwn()};
 
-    auto addResults = processAddOrder(modifiedOrder, availableCash, currentTime);
+    auto addResults = processAddOrder(modifiedOrder, availableCash, currentTime, commissionPerShare);
 
     responses.push_back({ResponseType::Modified, id, m_symbol, currentTime, modifiedOrder.getOrderSide(),
                          modifiedOrder.isOwn()});

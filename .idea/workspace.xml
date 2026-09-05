@@ -21,7 +21,6 @@
   <component name="CMakeRunConfigurationManager">
     <generated>
       <config projectName="mini_event_backtester" targetName="mini_event_backtester" />
-      <config projectName="mini_event_backtester" targetName="lobster_diff" />
     </generated>
   </component>
   <component name="CMakeSettings">
@@ -31,20 +30,37 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8dee8706-a0d2-404d-be62-9c3e11ab5fbe" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/arhitecture.mmd" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/new_historical_events.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data structures/double_linked_list.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/data structures/double_linked_list.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/arhitecture.mmd" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/.cmake/api/v1/reply/cache-v2-aad98b4eed761f364c88.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/.cmake/api/v1/reply/codemodel-v2-3d6877407d554194f3f4.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/.cmake/api/v1/reply/index-2026-08-30T08-13-34-0407.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/.cmake/api/v1/reply/target-lobster_diff-Debug-1a6bdf3d7cf969e8fd68.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/.cmake/api/v1/reply/target-mini_event_backtester-Debug-aa0462633459aff78742.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/.ninja_deps" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/.ninja_deps" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/.ninja_log" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/.ninja_log" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeCache.txt" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeCache.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/TargetDirectories.txt" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/TargetDirectories.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/clion-Debug-log.txt" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/clion-Debug-log.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/mini_event_backtester.dir/src/Event.cpp.obj" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/mini_event_backtester.dir/src/Event.cpp.obj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/mini_event_backtester.dir/src/OrderBook.cpp.obj" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/mini_event_backtester.dir/src/OrderBook.cpp.obj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/mini_event_backtester.dir/src/Portfolio.cpp.obj" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/mini_event_backtester.dir/src/Portfolio.cpp.obj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/mini_event_backtester.dir/src/Simulator.cpp.obj" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/mini_event_backtester.dir/src/Simulator.cpp.obj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/mini_event_backtester.dir/src/main.cpp.obj" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/mini_event_backtester.dir/src/main.cpp.obj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/rules.ninja" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/rules.ninja" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/Testing/Temporary/LastTest.log" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/Testing/Temporary/LastTest.log" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/build.ninja" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/build.ninja" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/historical_events.txt" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/notes_toDo.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/notes_toDo.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/Event.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/include/Event.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/Fill.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/include/Fill.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/AStrategy.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/include/FairPriceStrategy.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/include/OrderBook.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/include/OrderBook.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/Portfolio.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/include/Portfolio.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/include/Simulator.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/include/Simulator.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/Types.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/include/Types.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AStrategy.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/FairPriceStrategy.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Event.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Event.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Order.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Order.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/OrderBook.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/OrderBook.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Portfolio.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Portfolio.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Simulator.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Simulator.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.cpp" afterDir="false" />
     </list>
@@ -127,21 +143,12 @@
     &quot;settings.editor.selected.configurable&quot;: &quot;fileTemplates&quot;
   }
 }</component>
-  <component name="RunManager" selected="CMake Application.mini_event_backtester">
-    <configuration name="lobster_diff" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="mini_event_backtester" TARGET_NAME="lobster_diff" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="mini_event_backtester" RUN_TARGET_NAME="lobster_diff">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
+  <component name="RunManager">
     <configuration name="mini_event_backtester" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="mini_event_backtester" TARGET_NAME="mini_event_backtester" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="mini_event_backtester" RUN_TARGET_NAME="mini_event_backtester">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <list>
-      <item itemvalue="CMake Application.lobster_diff" />
-      <item itemvalue="CMake Application.mini_event_backtester" />
-    </list>
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">

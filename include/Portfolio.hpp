@@ -14,11 +14,14 @@ class Portfolio {
 private:
     Cash m_initialCash{};
     Cash m_availableCash{};
+    Price m_commissionPerShare{};
     std::unordered_map<Symbol, PositionState> m_positions{};
 
 public:
-    explicit Portfolio(Cash initialCash): m_initialCash(initialCash), m_availableCash(initialCash) {}
+    explicit Portfolio(Cash initialCash, Price commissionPerShare = 0):
+        m_initialCash(initialCash), m_availableCash(initialCash), m_commissionPerShare(commissionPerShare) {}
     Cash getAvailableCash() const { return m_availableCash; }
+    Price getCommissionPerShare() const { return m_commissionPerShare; }
     Cash getEquity(const std::unordered_map<Symbol, OrderBook>& books) const;
     Cash getPnL(const std::unordered_map<Symbol, OrderBook>& books) const { return getEquity(books) - m_initialCash; }
     Cash getRealizedPnL(const Symbol& symbol) { return m_positions[symbol].realizedPnL; }

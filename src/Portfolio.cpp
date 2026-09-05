@@ -12,6 +12,11 @@ void Portfolio::applyFill(const Fill &fill) {
 
     m_availableCash += fill.getSide() == Side::Sell ? price * qty : -price * qty;
 
+    ///comisionul se plateste pe orice fill, indiferent de directie; nu intra in avgEntryPrice
+    const Cash commission = m_commissionPerShare * qty;
+    m_availableCash -= commission;
+    pos.realizedPnL -= commission;
+
     bool opening = pos.quantity == 0;
     bool sameDirection = pos.quantity * signedQty > 0;
 

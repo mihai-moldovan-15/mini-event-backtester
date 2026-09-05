@@ -112,9 +112,9 @@ build CMakeFiles/mini_event_backtester.dir/src/Event.cpp.obj: CXX_COMPILER__mini
   OBJECT_FILE_DIR = CMakeFiles\mini_event_backtester.dir\src
   TARGET_SUPPORT_DIR = CMakeFiles\mini_event_backtester.dir
 
-build CMakeFiles/mini_event_backtester.dir/src/AStrategy.cpp.obj: CXX_COMPILER__mini_event_backtester_unscanned_Debug C$:/Github/mini-event-backtester/src/AStrategy.cpp || cmake_object_order_depends_target_mini_event_backtester
+build CMakeFiles/mini_event_backtester.dir/src/FairPriceStrategy.cpp.obj: CXX_COMPILER__mini_event_backtester_unscanned_Debug C$:/Github/mini-event-backtester/src/FairPriceStrategy.cpp || cmake_object_order_depends_target_mini_event_backtester
   CONFIG = Debug
-  DEP_FILE = CMakeFiles\mini_event_backtester.dir\src\AStrategy.cpp.obj.d
+  DEP_FILE = CMakeFiles\mini_event_backtester.dir\src\FairPriceStrategy.cpp.obj.d
   FLAGS = -g -std=gnu++20 -fdiagnostics-color=always
   INCLUDES = -IC:/Github/mini-event-backtester/include
   OBJECT_DIR = CMakeFiles\mini_event_backtester.dir
@@ -129,7 +129,7 @@ build CMakeFiles/mini_event_backtester.dir/src/AStrategy.cpp.obj: CXX_COMPILER__
 #############################################
 # Link the executable mini_event_backtester.exe
 
-build mini_event_backtester.exe: CXX_EXECUTABLE_LINKER__mini_event_backtester_Debug CMakeFiles/mini_event_backtester.dir/src/main.cpp.obj CMakeFiles/mini_event_backtester.dir/src/Order.cpp.obj CMakeFiles/mini_event_backtester.dir/src/Fill.cpp.obj CMakeFiles/mini_event_backtester.dir/src/OrderBook.cpp.obj CMakeFiles/mini_event_backtester.dir/src/Portfolio.cpp.obj CMakeFiles/mini_event_backtester.dir/src/Simulator.cpp.obj CMakeFiles/mini_event_backtester.dir/src/Event.cpp.obj CMakeFiles/mini_event_backtester.dir/src/AStrategy.cpp.obj
+build mini_event_backtester.exe: CXX_EXECUTABLE_LINKER__mini_event_backtester_Debug CMakeFiles/mini_event_backtester.dir/src/main.cpp.obj CMakeFiles/mini_event_backtester.dir/src/Order.cpp.obj CMakeFiles/mini_event_backtester.dir/src/Fill.cpp.obj CMakeFiles/mini_event_backtester.dir/src/OrderBook.cpp.obj CMakeFiles/mini_event_backtester.dir/src/Portfolio.cpp.obj CMakeFiles/mini_event_backtester.dir/src/Simulator.cpp.obj CMakeFiles/mini_event_backtester.dir/src/Event.cpp.obj CMakeFiles/mini_event_backtester.dir/src/FairPriceStrategy.cpp.obj
   CONFIG = Debug
   FLAGS = -g
   LINK_LIBRARIES = -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
@@ -140,62 +140,6 @@ build mini_event_backtester.exe: CXX_EXECUTABLE_LINKER__mini_event_backtester_De
   TARGET_IMPLIB = libmini_event_backtester.dll.a
   TARGET_PDB = mini_event_backtester.exe.dbg
   TARGET_SUPPORT_DIR = CMakeFiles\mini_event_backtester.dir
-
-# =============================================================================
-# Object build statements for EXECUTABLE target lobster_diff
-
-
-#############################################
-# Order-only phony target for lobster_diff
-
-build cmake_object_order_depends_target_lobster_diff: phony || .
-
-build CMakeFiles/lobster_diff.dir/tools/lobster_diff.cpp.obj: CXX_COMPILER__lobster_diff_unscanned_Debug C$:/Github/mini-event-backtester/tools/lobster_diff.cpp || cmake_object_order_depends_target_lobster_diff
-  CONFIG = Debug
-  DEP_FILE = CMakeFiles\lobster_diff.dir\tools\lobster_diff.cpp.obj.d
-  FLAGS = -g -std=gnu++20 -fdiagnostics-color=always
-  INCLUDES = -IC:/Github/mini-event-backtester/include
-  OBJECT_DIR = CMakeFiles\lobster_diff.dir
-  OBJECT_FILE_DIR = CMakeFiles\lobster_diff.dir\tools
-  TARGET_SUPPORT_DIR = CMakeFiles\lobster_diff.dir
-
-build CMakeFiles/lobster_diff.dir/src/Order.cpp.obj: CXX_COMPILER__lobster_diff_unscanned_Debug C$:/Github/mini-event-backtester/src/Order.cpp || cmake_object_order_depends_target_lobster_diff
-  CONFIG = Debug
-  DEP_FILE = CMakeFiles\lobster_diff.dir\src\Order.cpp.obj.d
-  FLAGS = -g -std=gnu++20 -fdiagnostics-color=always
-  INCLUDES = -IC:/Github/mini-event-backtester/include
-  OBJECT_DIR = CMakeFiles\lobster_diff.dir
-  OBJECT_FILE_DIR = CMakeFiles\lobster_diff.dir\src
-  TARGET_SUPPORT_DIR = CMakeFiles\lobster_diff.dir
-
-build CMakeFiles/lobster_diff.dir/src/OrderBook.cpp.obj: CXX_COMPILER__lobster_diff_unscanned_Debug C$:/Github/mini-event-backtester/src/OrderBook.cpp || cmake_object_order_depends_target_lobster_diff
-  CONFIG = Debug
-  DEP_FILE = CMakeFiles\lobster_diff.dir\src\OrderBook.cpp.obj.d
-  FLAGS = -g -std=gnu++20 -fdiagnostics-color=always
-  INCLUDES = -IC:/Github/mini-event-backtester/include
-  OBJECT_DIR = CMakeFiles\lobster_diff.dir
-  OBJECT_FILE_DIR = CMakeFiles\lobster_diff.dir\src
-  TARGET_SUPPORT_DIR = CMakeFiles\lobster_diff.dir
-
-
-# =============================================================================
-# Link build statements for EXECUTABLE target lobster_diff
-
-
-#############################################
-# Link the executable lobster_diff.exe
-
-build lobster_diff.exe: CXX_EXECUTABLE_LINKER__lobster_diff_Debug CMakeFiles/lobster_diff.dir/tools/lobster_diff.cpp.obj CMakeFiles/lobster_diff.dir/src/Order.cpp.obj CMakeFiles/lobster_diff.dir/src/OrderBook.cpp.obj
-  CONFIG = Debug
-  FLAGS = -g
-  LINK_LIBRARIES = -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
-  OBJECT_DIR = CMakeFiles\lobster_diff.dir
-  POST_BUILD = cd .
-  PRE_LINK = cd .
-  TARGET_FILE = lobster_diff.exe
-  TARGET_IMPLIB = liblobster_diff.dll.a
-  TARGET_PDB = lobster_diff.exe.dbg
-  TARGET_SUPPORT_DIR = CMakeFiles\lobster_diff.dir
 
 
 #############################################
@@ -223,8 +167,6 @@ build rebuild_cache: phony CMakeFiles/rebuild_cache.util
 # =============================================================================
 # Target aliases.
 
-build lobster_diff: phony lobster_diff.exe
-
 build mini_event_backtester: phony mini_event_backtester.exe
 
 # =============================================================================
@@ -235,7 +177,7 @@ build mini_event_backtester: phony mini_event_backtester.exe
 #############################################
 # Folder: C:/Github/mini-event-backtester/cmake-build-debug
 
-build all: phony mini_event_backtester.exe lobster_diff.exe
+build all: phony mini_event_backtester.exe
 
 # =============================================================================
 # Built-in targets

@@ -12,17 +12,8 @@ add_executable(mini_event_backtester
         src/Portfolio.cpp
         src/Simulator.cpp
         src/Event.cpp
-        src/AStrategy.cpp
+        src/FairPriceStrategy.cpp
         "data structures/double_linked_list.hpp"
 )
 
 target_include_directories(mini_event_backtester PRIVATE include)
-
-# Harness de validare a OrderBook-ului contra datelor LOBSTER
-add_executable(lobster_diff
-        tools/lobster_diff.cpp
-        src/Order.cpp
-        src/OrderBook.cpp
-)
-
-target_include_directories(lobster_diff PRIVATE include)

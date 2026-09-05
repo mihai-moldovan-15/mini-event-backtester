@@ -47,7 +47,9 @@ public:
 
     ///verif doar bestAsks/bestBids, nu ar trebui ca relevantAsks sa fie gol si otherAsks sa contina elemente
     Price getBestAsk() const { return (m_relevantAsks.empty()) ? 0: m_relevantAsks.begin()->first; }
+    Quantity getBestAskQuantity() const {return (m_relevantAsks.empty()) ? 0 : m_relevantAsks.begin()->second.totalQuantity; }
     Price getBestBid() const { return (m_relevantBids.empty()) ? 0: m_relevantBids.begin()->first; }
+    Quantity getBestBidQuantity() const {return (m_relevantBids.empty()) ? 0 : m_relevantBids.begin()->second.totalQuantity; }
 
     const auto& getRelevantAsks() const { return m_relevantAsks; }
     const auto& getRelevantBids() const { return m_relevantBids; }
@@ -58,10 +60,12 @@ public:
     void recordTrade(const Order& incoming, const Order& existing, Price price, Quantity qty,
                              Timestamp currentTime, std::vector<ResponseEvent>& responses) const;
     /// adaugarea efectiva in book, procesarea eventurilor, intorc response events
-    std::vector<ResponseEvent> processAddOrder(const Order& order, Cash availableCash, Timestamp currentTime); ///aici se intampla crossingul, poate genera mai multe responseuri
+    std::vector<ResponseEvent> processAddOrder(const Order& order, Cash availableCash, Timestamp currentTime,
+                                                Price commissionPerShare = 0); ///aici se intampla crossingul, poate genera mai multe responseuri
     ResponseEvent processCancelOrder(OrderId orderid, Timestamp currentTime, bool isOwnRequest);
     std::vector<ResponseEvent> processModifyOrder(OrderId id, Quantity newQty, std::optional<Price> newPrice,
-                                                   Cash availableCash, Timestamp currentTime, bool isOwnRequest);///add ul poate genera mai multe responseuri
+                                                   Cash availableCash, Timestamp currentTime, bool isOwnRequest,
+                                                   Price commissionPerShare = 0);///add ul poate genera mai multe responseuri
 
     Price getMarkPrice() const;
     Price getSpread() const;

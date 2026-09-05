@@ -28,21 +28,37 @@ private:
 
     std::unique_ptr<Strategy> m_strategy{};
     Timestamp m_strategyNextAvailableTime{};
+
+    SizeValue m_historicalRows{};
+    Cash m_minEquity{};
+    Cash m_maxEquity{};
+    std::unordered_map<Symbol, Position> m_finalPositions{};///pozitiile dinainte de lichidare
+    void sampleEquity();
+
 public:
     void run();
 
-    Simulator(std::unique_ptr<Strategy> strategy, Cash initialCash, Timestamp endTime = 1'000'000'000) :
-                            m_strategy(std::move(strategy)), m_portfolio{initialCash}, m_endTime(endTime){}
+    ///ordinea din lista de initializare urmeaza ordinea de declarare a membrilor
+    Simulator(std::unique_ptr<Strategy> strategy, Cash initialCash, Timestamp endTime = 1'000'000'000,
+              Price commissionPerShare = 0) :
+                            m_endTime(endTime), m_portfolio{initialCash, commissionPerShare},
+                            m_strategy(std::move(strategy)) {}
     Timestamp getCurrTimeStamp() const { return m_currentTime; }
     const Portfolio& getPortfolio() const { return m_portfolio; }
 
     OrderBook& getOrderBook(const Symbol& symbol); //not ideal
     const OrderBook& getOrderBook(const Symbol& symbol) const;
     const std::unordered_map<Symbol, OrderBook>& getOrderBooks() const { return m_orderBooks; }
-    OrderBook& getOrderBookForOrder(OrderId id);//modify si cancel
+    OrderBook& getOrderBookForOrder(OrderId id);   //modify si cancel
     const Timestamp getReturnLatency() const { return m_returnLatency; }
 
     const std::vector<Fill>& getFillsRecord() const { return m_fillsRecord; }
+
+    SizeValue getHistoricalRowCount() const { return m_historicalRows; }
+    Cash getMinEquity() const { return m_minEquity; }
+    Cash getMaxEquity() const { return m_maxEquity; }
+    ///pozitia de dinainte de lichidarea finala; dupa run() cea din portofoliu e mereu 0
+    Position getFinalPosition(const Symbol& symbol) const;
 
     void loadHistoricalEvents(const std::filesystem::path& dataFile);
     void scheduleTimer();

@@ -2,10 +2,10 @@
 	"artifacts" : 
 	[
 		{
-			"path" : "lobster_diff.exe"
+			"path" : "mini_event_backtester.exe"
 		},
 		{
-			"path" : "lobster_diff.pdb"
+			"path" : "mini_event_backtester.pdb"
 		}
 	],
 	"backtrace" : 1,
@@ -28,13 +28,13 @@
 			{
 				"command" : 0,
 				"file" : 0,
-				"line" : 22,
+				"line" : 7,
 				"parent" : 0
 			},
 			{
 				"command" : 1,
 				"file" : 0,
-				"line" : 28,
+				"line" : 19,
 				"parent" : 0
 			}
 		]
@@ -73,11 +73,16 @@
 			[
 				0,
 				1,
-				2
+				2,
+				3,
+				4,
+				5,
+				6,
+				7
 			]
 		}
 	],
-	"id" : "lobster_diff::@6890427a1f51a3e7e1df",
+	"id" : "mini_event_backtester::@6890427a1f51a3e7e1df",
 	"link" : 
 	{
 		"commandFragments" : 
@@ -93,8 +98,8 @@
 		],
 		"language" : "CXX"
 	},
-	"name" : "lobster_diff",
-	"nameOnDisk" : "lobster_diff.exe",
+	"name" : "mini_event_backtester",
+	"nameOnDisk" : "mini_event_backtester.exe",
 	"paths" : 
 	{
 		"build" : ".",
@@ -108,7 +113,19 @@
 			[
 				0,
 				1,
-				2
+				2,
+				3,
+				4,
+				5,
+				6,
+				7
+			]
+		},
+		{
+			"name" : "Header Files",
+			"sourceIndexes" : 
+			[
+				8
 			]
 		}
 	],
@@ -117,7 +134,7 @@
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "tools/lobster_diff.cpp",
+			"path" : "src/main.cpp",
 			"sourceGroupIndex" : 0
 		},
 		{
@@ -129,8 +146,43 @@
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
+			"path" : "src/Fill.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
 			"path" : "src/OrderBook.cpp",
 			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "src/Portfolio.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "src/Simulator.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "src/Event.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "src/FairPriceStrategy.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"path" : "data structures/double_linked_list.hpp",
+			"sourceGroupIndex" : 1
 		}
 	],
 	"type" : "EXECUTABLE"
