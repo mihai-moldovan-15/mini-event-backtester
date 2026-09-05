@@ -1,6 +1,6 @@
 #include "AStrategy.hpp"
 
-std::optional<std::vector<std::unique_ptr<Event>>> AStrategy::onTime(
+std::optional<std::vector<std::unique_ptr<Event>>> FairPriceStrategy::onTime(
     Timestamp ts,
     const std::unordered_map<Symbol, OrderBook>& orderBooks,
     const Portfolio& portfolio,

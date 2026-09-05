@@ -2,7 +2,7 @@
 #include "Strategy.hpp"
 #include "Portfolio.hpp"
 
-class AStrategy : public Strategy {
+class FairPriceStrategy : public Strategy {
 public:
     std::optional<std::vector<std::unique_ptr<Event>>> onTime
     (Timestamp ts,
