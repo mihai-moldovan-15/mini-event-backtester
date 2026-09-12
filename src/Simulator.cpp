@@ -48,11 +48,11 @@ void Simulator::run() {
         }
         else {
             m_currentTime = persTs;
+            // REVIEW: Folosirea const_cast pentru a muta din priority_queue este comportament nedefinit - top() returnează referință const
             auto event = std::move(const_cast<std::unique_ptr<Event>&>(m_personalEvents.top()));
             m_personalEvents.pop();
             event->execute(*this);
         }
-
         sampleEquity();
     }
 

@@ -57,6 +57,7 @@ public:
         node->next = m_freeHead;
         m_freeHead = node;
     }
+    // REVIEW: Lipsă destructor - când NodePool este distrus, blocurile alocate în m_blocks nu sunt niciodată eliberate
 };
 
 template<typename T>
@@ -124,6 +125,7 @@ bool List<T>::empty() const { return !m_size; }
 
 template<typename T>
 ListNode<T>* List<T>::erase(ListNode<T>* node) {
+    // REVIEW: Lipsă verificare de limite - nu verifică dacă pointerul nodului aparține acestei liste, permițând coruperea cu pointeri invalizi
     if (!node)
         return nullptr;
 
@@ -146,6 +148,7 @@ ListNode<T>* List<T>::erase(ListNode<T>* node) {
 
 template<typename T>
 ListNode<T>* List<T>::insert(ListNode<T>* node, T value) {
+    // REVIEW: Lipsă verificare de limite - nu verifică dacă pointerul nodului aparține acestei liste, permițând coruperea cu pointeri invalizi
     auto* newNode = m_pool->allocate();
     newNode->value = std::move(value);
     if (!m_size) {

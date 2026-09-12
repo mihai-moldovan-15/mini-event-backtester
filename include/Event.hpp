@@ -11,6 +11,7 @@ class Event {
 private:
     Timestamp m_sentTs{};
     SequenceNumber m_sqNum{};
+    // REVIEW: Contorul static poate cauza coliziuni de numere de secvență între multiple instanțe de Simulator sau la repornirea programului
     inline static SequenceNumber m_nextSqNum{};
 public:
     Event(Timestamp sentTs, SequenceNumber sqNum = ++m_nextSqNum): m_sentTs(sentTs), m_sqNum(sqNum) {}

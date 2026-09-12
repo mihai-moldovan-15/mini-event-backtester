@@ -18,6 +18,7 @@ struct BookLevel {
 
 class OrderBook {
 private:
+    // REVIEW: Pointerii raw către BookLevel și ListNode<Order> devin dangling când rebalanceLevels() mută niveluri între hărți
     struct OrderLocation {
         Side side;
         Price price;
