@@ -3,6 +3,7 @@
 #include <format>
 #include <stdexcept>
 
+// nefolosit momentan
 void OrderBook::validate() const {
     if (m_symbol.empty())
         throw std::invalid_argument("Missing book symbol");
@@ -160,7 +161,6 @@ std::vector<ResponseEvent> OrderBook::processAddOrder(const Order& order, Cash a
                 Quantity qty = std::min(newOrder.getQuantity(), existing.getQuantity());
 
                 if (newOrder.isOwn()) {
-                    ///cumparam noi, deci platim si comisionul pe fiecare actiune
                     const Cash costPerShare = existingPrice + commissionPerShare;
                     auto affordableQty = static_cast<Quantity>(remainingCash / costPerShare);
                     if (affordableQty == 0) {

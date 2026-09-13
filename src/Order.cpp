@@ -49,55 +49,55 @@ std::ostream& operator<<(std::ostream& out, const Order& order) {
     return out;
 }
 
-std::istream& operator>>(std::istream& in, Order& order) {
-    const Symbol symbol{"AAA"};/// momentan exista un singur simbol
-    //in >> symbol;
-
-    Timestamp ts{};
-    in >> ts;
-
-    if (in.eof())
-        return in;
-
-    Side side = [&]() {
-        std::string s;
-        in >> s;
-        std::ranges::transform(s, s.begin(), ::toupper);
-
-        if (s == "BUY")
-            return Side::Buy;
-        if (s == "SELL")
-            return Side::Sell;
-
-        throw std::invalid_argument("Invalid side " + s);
-    }();
-
-    Quantity quantity{};
-    in >> quantity;
-
-    OrderType type = [&]() {
-        std::string s;
-        in >> s;
-        std::ranges::transform(s, s.begin(), ::toupper);
-        if (s == "LIMIT")
-            return OrderType::Limit;
-        if (s == "MARKET")
-            return OrderType::Market;
-
-        throw std::invalid_argument("Invalid order type " + s);
-    }();
-
-    std::optional<Price> limitPrice{};
-    if (type == OrderType::Limit) {
-        Price p;
-        in >> p;
-        limitPrice = p;
-    }
-
-    if (!in)
-        throw std::invalid_argument("Error reading from stream");
-
-    order = Order(symbol, ts, side, quantity, type, limitPrice);
-
-    return in;
-}
+// std::istream& operator>>(std::istream& in, Order& order) {
+//     const Symbol symbol{"AAA"};/// momentan exista un singur simbol
+//     //in >> symbol;
+//
+//     Timestamp ts{};
+//     in >> ts;
+//
+//     if (in.eof())
+//         return in;
+//
+//     Side side = [&]() {
+//         std::string s;
+//         in >> s;
+//         std::ranges::transform(s, s.begin(), ::toupper);
+//
+//         if (s == "BUY")
+//             return Side::Buy;
+//         if (s == "SELL")
+//             return Side::Sell;
+//
+//         throw std::invalid_argument("Invalid side " + s);
+//     }();
+//
+//     Quantity quantity{};
+//     in >> quantity;
+//
+//     OrderType type = [&]() {
+//         std::string s;
+//         in >> s;
+//         std::ranges::transform(s, s.begin(), ::toupper);
+//         if (s == "LIMIT")
+//             return OrderType::Limit;
+//         if (s == "MARKET")
+//             return OrderType::Market;
+//
+//         throw std::invalid_argument("Invalid order type " + s);
+//     }();
+//
+//     std::optional<Price> limitPrice{};
+//     if (type == OrderType::Limit) {
+//         Price p;
+//         in >> p;
+//         limitPrice = p;
+//     }
+//
+//     if (!in)
+//         throw std::invalid_argument("Error reading from stream");
+//
+//     order = Order(symbol, ts, side, quantity, type, limitPrice);
+//
+//     return in;
+// }

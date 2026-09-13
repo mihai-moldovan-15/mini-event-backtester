@@ -19,6 +19,11 @@ struct BookLevel {
 class OrderBook {
 private:
     // REVIEW: Pointerii raw către BookLevel și ListNode<Order> devin dangling când rebalanceLevels() mută niveluri între hărți
+    // Raspuns: Pointers and references to the extracted element become usable if the element is inserted into a container
+    //          https://en.cppreference.com/cpp/container/map/extract
+    //          Din ce inteleg singura problema care ar putea aparea aici ar fi daca as incerca sa accesez printr-un pointer
+    //          sau referinta node_handle intre extract si insert
+
     struct OrderLocation {
         Side side;
         Price price;

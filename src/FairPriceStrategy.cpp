@@ -7,7 +7,7 @@ std::optional<std::vector<std::unique_ptr<Event>>> FairPriceStrategy::onTime(
     const std::vector<ResponseEvent>& eventsSinceLastCall)
 {
     std::vector<std::unique_ptr<Event>> strategyEvents{};
-    constexpr Quantity orderQuantity{1};
+    const Quantity orderQuantity{1};
 
     for (const auto& [symbol, orderBook] : orderBooks) {
         const Price bestBid = orderBook.getBestBid();

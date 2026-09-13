@@ -18,8 +18,8 @@ public:
     Event(const Event&) = delete; ///Event e abstract class, can t instantiate an Event object
     Event& operator=(const Event&) = delete;///same logic
     [[nodiscard]] Timestamp getTimeStamp() const { return m_sentTs; }
-    [[nodiscard]] SequenceNumber getSequenceNumber() const { return m_sqNum; }///tot timpul voi procesa evenimentele istorice inaintea celor
-                                                                ///celor personale
+    [[nodiscard]] SequenceNumber getSequenceNumber() const { return m_sqNum; }  ///tot timpul voi procesa evenimentele istorice inaintea celor
+                                                                                ///celor personale
     void addLatency(Timestamp latency) { m_sentTs += latency; }
 
     virtual void execute(Simulator&) = 0;
@@ -93,8 +93,8 @@ public:
 };
 
 struct eventCompare {
-    bool operator()(const std::unique_ptr<Event>& a,
-                    const std::unique_ptr<Event>& b) const {
+    bool operator()(const std::shared_ptr<Event>& a,
+                    const std::shared_ptr<Event>& b) const {
         if (a->getTimeStamp() != b->getTimeStamp())
             return a->getTimeStamp() > b->getTimeStamp();
 

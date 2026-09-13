@@ -6,11 +6,16 @@
 #include <vector>
 #include <memory>
 
+/// forward declaration (pentru owner{})
+template <typename T>
+class List;
+
 template<typename T>
 struct ListNode {
     T value{};
     ListNode<T>* prev{};
     ListNode<T>* next{};
+    List<T>* owner{};       /// Verificarea ca un nod apartine unei liste
 };
 
 ///Although NodePool este o lista simplu inlantuita si next este momentan nefolosit, nodurile alocate in pool
@@ -58,6 +63,7 @@ public:
         m_freeHead = node;
     }
     // REVIEW: Lipsă destructor - când NodePool este distrus, blocurile alocate în m_blocks nu sunt niciodată eliberate
+    // Raspuns: Smart pointerii asigura eliberarea memoriei cand m_blocks e distrus
 };
 
 template<typename T>
@@ -129,6 +135,11 @@ ListNode<T>* List<T>::erase(ListNode<T>* node) {
     if (!node)
         return nullptr;
 
+    // Raspuns:
+    if (node->owner != this)
+        return nullptr;
+
+    node->owner = nullptr;
     auto* aux = node->next;
     if (node->prev)
         node->prev->next = node->next;
@@ -149,7 +160,15 @@ ListNode<T>* List<T>::erase(ListNode<T>* node) {
 template<typename T>
 ListNode<T>* List<T>::insert(ListNode<T>* node, T value) {
     // REVIEW: Lipsă verificare de limite - nu verifică dacă pointerul nodului aparține acestei liste, permițând coruperea cu pointeri invalizi
+    // Raspuns:
+    if (node && node->owner != this)
+        return nullptr;
+
+    if (!node && m_size)
+        return nullptr;
+
     auto* newNode = m_pool->allocate();
+    newNode->owner = this;
     newNode->value = std::move(value);
     if (!m_size) {
         m_head = m_tail = newNode;
@@ -172,13 +191,17 @@ ListNode<T>* List<T>::insert(ListNode<T>* node, T value) {
 
 template<typename T>
 void List<T>::push_back(T value) {
-    insert(m_tail, std::move(value));
+
+    if (!insert(m_tail, std::move(value)))
+        throw std::logic_error("Tail node does not belong to this list");
 }
 
 template<typename T>
 void List<T>::push_front(T value) {
     auto* newNode = m_pool->allocate();
     newNode->value = std::move(value);
+    newNode->owner = this;
+
     if (!m_size) {
         m_head = m_tail = newNode;
         ++m_size;
