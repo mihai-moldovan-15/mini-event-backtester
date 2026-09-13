@@ -3,6 +3,7 @@
 #include <format>
 #include <stdexcept>
 
+// nefolosit momentan
 void OrderBook::validate() const {
     if (m_symbol.empty())
         throw std::invalid_argument("Missing book symbol");
@@ -132,6 +133,7 @@ void OrderBook::recordTrade(const Order& incoming, const Order& existing, Price 
                                .isOwn = existing.isOwn(), .fillQty = qty ,.fillPrice = price} );
 }
 
+// REVIEW: Logica de matching pentru ordinele de cumpărare și vânzare este aproape identică dar duplicată, poti folosi o functie helper
 std::vector<ResponseEvent> OrderBook::processAddOrder(const Order& order, Cash availableCash, const Timestamp currentTime,
                                                       Price commissionPerShare) {
     Order newOrder = order;
@@ -159,7 +161,6 @@ std::vector<ResponseEvent> OrderBook::processAddOrder(const Order& order, Cash a
                 Quantity qty = std::min(newOrder.getQuantity(), existing.getQuantity());
 
                 if (newOrder.isOwn()) {
-                    ///cumparam noi, deci platim si comisionul pe fiecare actiune
                     const Cash costPerShare = existingPrice + commissionPerShare;
                     auto affordableQty = static_cast<Quantity>(remainingCash / costPerShare);
                     if (affordableQty == 0) {
@@ -197,7 +198,7 @@ std::vector<ResponseEvent> OrderBook::processAddOrder(const Order& order, Cash a
             }
         }
     }
-    else { ///Side::Sell
+    else {
         auto& relevantLevels = m_relevantBids;
         auto& otherLevels = m_otherBids;
         bool inRelevant = true;
@@ -328,7 +329,6 @@ std::vector<ResponseEvent> OrderBook::processModifyOrder(OrderId id, Quantity ne
         responses.push_back({ResponseType::ModifyFailed, id, m_symbol, currentTime, Side{}, isOwnRequest});
         return responses;
     }
-
     if (newQty <= 0) {
         responses.push_back({ResponseType::ModifyFailed, id, m_symbol, currentTime, it->second.side,
                              it->second.it->value.isOwn()});

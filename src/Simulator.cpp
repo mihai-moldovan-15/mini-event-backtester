@@ -10,8 +10,6 @@
 #include "Event.hpp"
 
 void Simulator::sampleEquity() {
-    ///getMarkPrice arunca pe o carte complet goala, asa ca sarim peste esantioanele in care
-    ///vreun simbol nu are inca niciun pret
     for (const auto& [symbol, book] : m_orderBooks)
         if (book.getBestBid() == 0 && book.getBestAsk() == 0)
             return;
@@ -48,11 +46,12 @@ void Simulator::run() {
         }
         else {
             m_currentTime = persTs;
-            auto event = std::move(const_cast<std::unique_ptr<Event>&>(m_personalEvents.top()));
+            // REVIEW: Folosirea const_cast pentru a muta din priority_queue este comportament nedefinit - top() returnează referință const
+            // Raspuns: am pus shared_ptr in loc de unique_ptr
+            std::shared_ptr<Event> event = m_personalEvents.top();
             m_personalEvents.pop();
             event->execute(*this);
         }
-
         sampleEquity();
     }
 
@@ -113,7 +112,7 @@ void Simulator::loadHistoricalEvents(const std::filesystem::path& dataFile) {
 
     while (std::getline(in, line)) {
         ++lineNumber;
-        if (line.empty() || line.front() == '#')
+        if (line.empty())
             continue;
 
         std::istringstream stream(line);

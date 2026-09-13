@@ -13,6 +13,10 @@ void Portfolio::applyFill(const Fill &fill) {
     m_availableCash += fill.getSide() == Side::Sell ? price * qty : -price * qty;
 
     ///comisionul se plateste pe orice fill, indiferent de directie; nu intra in avgEntryPrice
+    ///// REVIEW: Comisionul este dedus din ambele availableCash și realizedPnL - numără dublu costurile comisionului, făcând P&L incorect
+    ///  Raspuns: getPnL() / getEquity() folosesc doar availableCash, realizedPnL nu e folosit niciodata in calcularea efectiva a P&L
+    ///           nu e cel mai bun design choice
+
     const Cash commission = m_commissionPerShare * qty;
     m_availableCash -= commission;
     pos.realizedPnL -= commission;
@@ -49,6 +53,8 @@ Cash Portfolio::getEquity(const std::unordered_map<Symbol, OrderBook>& books) co
     for (const auto& [symbol, pos] : m_positions) {
         auto it = books.find(symbol);
         if (it != books.end())
+            // REVIEW: Risc de overflow întreg - pos.quantity * getMarkPrice() poate face overflow pentru poziții mari sau prețuri folosind int64_t
+            // Raspuns: Cred ca e putin probabil un overflow, as lasa codul asa
             equity += pos.quantity * it->second.getMarkPrice();
     }
     return equity;
@@ -69,12 +75,18 @@ void Portfolio::liquidate(const std::unordered_map<Symbol, OrderBook>& books) {
             continue;
 
         bool isLong = position.quantity > 0;
-        Price exitPrice = isLong ? it->second.getBestBid() : it->second.getBestAsk();
 
-        if (exitPrice == 0 && !it->second.getMarkPrice())
+        // REVIEW: Logică gresita de fallback, getMarkPrice() aruncă excepție când bid și ask sunt ambele 0, deci apelul din prima condiție va cauza crash
+        // Raspuns:
+        Price bestBid = it->second.getBestBid();
+        Price bestAsk = it->second.getBestAsk();
+
+        if (!bestBid && !bestAsk)
             continue;
 
-        if (exitPrice == 0 && it->second.getMarkPrice())
+        Price exitPrice = isLong ? bestBid : bestAsk;
+
+        if (exitPrice == 0)
             exitPrice = it->second.getMarkPrice();
 
         Quantity qt = std::abs(position.quantity);

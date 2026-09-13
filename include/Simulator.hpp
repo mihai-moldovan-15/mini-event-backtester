@@ -19,7 +19,7 @@ private:
     Timestamp m_endTime{ 21'000'000'000 };
     Portfolio m_portfolio;
     std::unordered_map<Symbol, OrderBook> m_orderBooks{};
-    std::priority_queue<std::unique_ptr<Event>, std::vector<std::unique_ptr<Event>>, eventCompare> m_personalEvents{};
+    std::priority_queue<std::shared_ptr<Event>, std::vector<std::shared_ptr<Event>>, eventCompare> m_personalEvents{};
     std::vector<std::unique_ptr<Event>> m_historicalEvents{};
     std::unordered_map<OrderId, Symbol> m_OrderIdToSymbol; /// pentru CancelOrderEvent si ModifyOrderEvent
     std::vector<Fill> m_fillsRecord{};
@@ -68,5 +68,5 @@ public:
     void addBook(const Symbol& symbol);
     void cancelAllOpenOrders();
 
-    void scheduleEvent(std::unique_ptr<Event> event) { m_personalEvents.push(std::move(event)); }
+    void scheduleEvent(std::shared_ptr<Event> event) { m_personalEvents.push(std::move(event)); }
 };
