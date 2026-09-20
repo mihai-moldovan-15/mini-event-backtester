@@ -1,6 +1,7 @@
 #include "Portfolio.hpp"
 #include "OrderBook.hpp"
 #include <algorithm>
+#include <cstdlib>
 
 void Portfolio::applyFill(const Fill &fill) {
     PositionState& pos = m_positions[fill.getSymbol()];
@@ -69,12 +70,16 @@ void Portfolio::liquidate(const std::unordered_map<Symbol, OrderBook>& books) {
             continue;
 
         bool isLong = position.quantity > 0;
-        Price exitPrice = isLong ? it->second.getBestBid() : it->second.getBestAsk();
 
-        if (exitPrice == 0 && !it->second.getMarkPrice())
+        Price bestBid = it->second.getBestBid();
+        Price bestAsk = it->second.getBestAsk();
+
+        if (!bestBid && !bestAsk)
             continue;
 
-        if (exitPrice == 0 && it->second.getMarkPrice())
+        Price exitPrice = isLong ? bestBid : bestAsk;
+
+        if (exitPrice == 0)
             exitPrice = it->second.getMarkPrice();
 
         Quantity qt = std::abs(position.quantity);

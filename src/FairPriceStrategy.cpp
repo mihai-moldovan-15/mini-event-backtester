@@ -7,7 +7,7 @@ std::optional<std::vector<std::unique_ptr<Event>>> FairPriceStrategy::onTime(
     const std::vector<ResponseEvent>& eventsSinceLastCall)
 {
     std::vector<std::unique_ptr<Event>> strategyEvents{};
-    constexpr Quantity orderQuantity{1};
+    const Quantity orderQuantity{1};
 
     for (const auto& [symbol, orderBook] : orderBooks) {
         const Price bestBid = orderBook.getBestBid();
@@ -38,7 +38,7 @@ std::optional<std::vector<std::unique_ptr<Event>>> FairPriceStrategy::onTime(
 
         const bool canAffordBuy = portfolio.getAvailableCash() >=
                                   (bestAsk + portfolio.getCommissionPerShare()) * orderQuantity;
-
+                                  
         if (canAffordBuy && position < m_config.maxPosition && buyEdge >= requiredBuyEdge)
             strategyEvents.push_back(std::make_unique<AddPersonalOrderEvent>(ts,
                     Order{symbol, ts, Side::Buy, orderQuantity, OrderType::Limit, bestAsk, true}));

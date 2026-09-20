@@ -15,13 +15,13 @@ private:
     Timestamp m_currentTime{};
     const Timestamp m_sendLatency{ 3'000'000 };
     const Timestamp m_returnLatency{ 3'000'000 };
-    const Timestamp m_timeDelta{ 3'000'000 };
+    const Timestamp m_timeDelta{ 10'000'000 };
     Timestamp m_endTime{ 21'000'000'000 };
     Portfolio m_portfolio;
     std::unordered_map<Symbol, OrderBook> m_orderBooks{};
-    std::priority_queue<std::unique_ptr<Event>, std::vector<std::unique_ptr<Event>>, eventCompare> m_personalEvents{};
+    std::priority_queue<std::shared_ptr<Event>, std::vector<std::shared_ptr<Event>>, eventCompare> m_personalEvents{};
     std::vector<std::unique_ptr<Event>> m_historicalEvents{};
-    std::unordered_map<OrderId, Symbol> m_OrderIdToSymbol; /// pentru CancelOrderEvent si ModifyOrderEvent
+    std::unordered_map<OrderId, Symbol> m_OrderIdToSymbol;      /// pentru CancelOrderEvent si ModifyOrderEvent
     std::vector<Fill> m_fillsRecord{};
     std::vector<ResponseEvent> m_pendingResponses{};
 
@@ -32,7 +32,7 @@ private:
     SizeValue m_historicalRows{};
     Cash m_minEquity{};
     Cash m_maxEquity{};
-    std::unordered_map<Symbol, Position> m_finalPositions{};///pozitiile dinainte de lichidare
+    std::unordered_map<Symbol, Position> m_finalPositions{};    ///pozitiile dinainte de lichidare
     void sampleEquity();
 
 public:
@@ -43,6 +43,7 @@ public:
               Price commissionPerShare = 0) :
                             m_endTime(endTime), m_portfolio{initialCash, commissionPerShare},
                             m_strategy(std::move(strategy)) {}
+
     Timestamp getCurrTimeStamp() const { return m_currentTime; }
     const Portfolio& getPortfolio() const { return m_portfolio; }
 
@@ -68,5 +69,5 @@ public:
     void addBook(const Symbol& symbol);
     void cancelAllOpenOrders();
 
-    void scheduleEvent(std::unique_ptr<Event> event) { m_personalEvents.push(std::move(event)); }
+    void scheduleEvent(std::shared_ptr<Event> event) { m_personalEvents.push(std::move(event)); }
 };

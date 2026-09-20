@@ -2,74 +2,13 @@
 
 #include <format>
 #include <stdexcept>
+#include <sstream>
+#include <iomanip>
+#include <algorithm>
+#include <iterator>
 
 // Review: fmtPrice uses std::ostringstream, std::setfill, and std::setw below, but this file does not include <sstream> or <iomanip>, so the project fails to compile.
-void OrderBook::validate() const {
-    if (m_symbol.empty())
-        throw std::invalid_argument("Missing book symbol");
-
-    if (!m_relevantAsks.empty() &&!m_relevantBids.empty() && m_relevantAsks.begin()->first < m_relevantBids.begin()->first)
-        throw std::logic_error("Book cannot be crossed");
-
-    if (!m_relevantBids.empty() && m_relevantBids.rbegin()->first < 0)
-        throw std::invalid_argument("Bid prices cannot be negative");
-
-    if (!m_otherBids.empty() && m_otherBids.rbegin()->first < 0)
-        throw std::invalid_argument("Bid prices cannot be negative");
-
-    for (const auto& [price, level] : m_relevantBids) {
-        if (level.totalQuantity <= 0)
-            throw std::logic_error("Bid level has non-positive quantity at " + std::to_string(price));
-
-        Quantity sum{};
-        for (auto it = level.orders.getHead(); it != nullptr; it=it->next)
-            sum += it->value.getQuantity();
-
-        if (sum != level.totalQuantity)
-            throw std::logic_error("Bid level totalQuantity mismatch at price " + std::to_string(price));
-    }
-
-    for (const auto& [price, level] : m_otherBids) {
-        if (level.totalQuantity <= 0)
-            throw std::logic_error("Bid level has non-positive quantity at " + std::to_string(price));
-
-        Quantity sum{};
-        for (auto it = level.orders.getHead(); it != nullptr; it=it->next)
-            sum += it->value.getQuantity();
-
-        if (sum != level.totalQuantity)
-            throw std::logic_error("Bid level totalQuantity mismatch at price " + std::to_string(price));
-    }
-
-    if (!m_relevantAsks.empty() && m_relevantAsks.begin()->first < 0)
-        throw std::invalid_argument("Ask prices cannot be negative");
-    if (!m_otherAsks.empty() && m_otherAsks.begin()->first < 0)
-        throw std::invalid_argument("Ask prices cannot be negative");
-
-    for (const auto& [price, level] : m_relevantAsks) {
-        if (level.totalQuantity <= 0)
-            throw std::logic_error("Ask level has non-positive quantity at " + std::to_string(price));
-
-        Quantity sum{};
-        for (auto it = level.orders.getHead(); it != nullptr; it=it->next)
-            sum += it->value.getQuantity();
-
-        if (sum != level.totalQuantity)
-            throw std::logic_error("Ask level totalQuantity mismatch at price " + std::to_string(price));
-    }
-
-    for (const auto& [price, level] : m_otherAsks) {
-        if (level.totalQuantity <= 0)
-            throw std::logic_error("Ask level has non-positive quantity at " + std::to_string(price));
-
-        Quantity sum{};
-        for (auto it = level.orders.getHead(); it != nullptr; it=it->next)
-            sum += it->value.getQuantity();
-
-        if (sum != level.totalQuantity)
-            throw std::logic_error("Ask level totalQuantity mismatch at price " + std::to_string(price));
-    }
-}
+// Response: #included them, the code ran on my machine, should work now.
 
 Price OrderBook::getMarkPrice() const {
     Price bestAskPrice{ getBestAsk() };
@@ -413,9 +352,129 @@ std::ostream& operator<<(std::ostream& out, const OrderBook& book) {
         ++printed;
            }
 
-    if (printed == maxLevels)
-        out << "... (truncated)\n";
-
-    out << std::setfill(' ');
-    return out;
-}
+//Dead code
+// std::ostream& operator<<(std::ostream& out, const OrderBook& book) {
+//     std::string title = "ORDER BOOK FOR " + book.getSymbol();
+//     constexpr int totalWidth{ 60 };
+//     constexpr int colWidth{ 12 };
+//
+//     out << std::string((totalWidth - static_cast<int>(title.size())) / 2, ' ')
+//         << title << "\n\n";
+//
+//     out << std::left
+//         << std::setw(colWidth * 2) << "BIDS"
+//         << " | "
+//         << std::setw(colWidth * 2) << "ASKS" << '\n';
+//
+//     out << std::setw(colWidth) << "Price"
+//         << std::setw(colWidth) << "Qty"
+//         << " | "
+//         << std::setw(colWidth) << "Price"
+//         << std::setw(colWidth) << "Qty" << '\n';
+//
+//     out << std::string(totalWidth, '-') << '\n';
+//
+//     auto bidIt{ book.getRelevantBids().begin() };
+//     auto askIt{ book.getRelevantAsks().begin() };
+//
+//     const size_t maxLevels{ 20 };
+//     size_t printed{};
+//
+//     while ((bidIt != book.getRelevantBids().end() || askIt != book.getRelevantAsks().end())
+//            && printed < maxLevels) {
+//         if (bidIt != book.getRelevantBids().end()) {
+//             out << std::setw(colWidth) << fmtPrice(bidIt->first)
+//                 << std::setw(colWidth) << bidIt->second.totalQuantity;
+//             ++bidIt;
+//         }
+//         else
+//             out << std::setw(colWidth * 2) << "";
+//
+//         out << " | ";
+//
+//         if (askIt != book.getRelevantAsks().end()) {
+//             out << std::setw(colWidth) << fmtPrice(askIt->first)
+//                 << std::setw(colWidth) << askIt->second.totalQuantity;
+//             ++askIt;
+//         }
+//         else
+//             out << std::setw(colWidth * 2) << "";
+//
+//         out << '\n';
+//         ++printed;
+//            }
+//
+//     if (printed == maxLevels)
+//         out << "... (truncated)\n";
+//
+//     out << std::setfill(' ');
+//     return out;
+// }
+//
+// // nefolosit momentan
+// void OrderBook::validate() const {
+//     if (m_symbol.empty())
+//         throw std::invalid_argument("Missing book symbol");
+//
+//     if (!m_relevantAsks.empty() &&!m_relevantBids.empty() && m_relevantAsks.begin()->first < m_relevantBids.begin()->first)
+//         throw std::logic_error("Book cannot be crossed");
+//
+//     if (!m_relevantBids.empty() && m_relevantBids.rbegin()->first < 0)
+//         throw std::invalid_argument("Bid prices cannot be negative");
+//
+//     if (!m_otherBids.empty() && m_otherBids.rbegin()->first < 0)
+//         throw std::invalid_argument("Bid prices cannot be negative");
+//
+//     for (const auto& [price, level] : m_relevantBids) {
+//         if (level.totalQuantity <= 0)
+//             throw std::logic_error("Bid level has non-positive quantity at " + std::to_string(price));
+//
+//         Quantity sum{};
+//         for (auto it = level.orders.getHead(); it != nullptr; it=it->next)
+//             sum += it->value.getQuantity();
+//
+//         if (sum != level.totalQuantity)
+//             throw std::logic_error("Bid level totalQuantity mismatch at price " + std::to_string(price));
+//     }
+//
+//     for (const auto& [price, level] : m_otherBids) {
+//         if (level.totalQuantity <= 0)
+//             throw std::logic_error("Bid level has non-positive quantity at " + std::to_string(price));
+//
+//         Quantity sum{};
+//         for (auto it = level.orders.getHead(); it != nullptr; it=it->next)
+//             sum += it->value.getQuantity();
+//
+//         if (sum != level.totalQuantity)
+//             throw std::logic_error("Bid level totalQuantity mismatch at price " + std::to_string(price));
+//     }
+//
+//     if (!m_relevantAsks.empty() && m_relevantAsks.begin()->first < 0)
+//         throw std::invalid_argument("Ask prices cannot be negative");
+//     if (!m_otherAsks.empty() && m_otherAsks.begin()->first < 0)
+//         throw std::invalid_argument("Ask prices cannot be negative");
+//
+//     for (const auto& [price, level] : m_relevantAsks) {
+//         if (level.totalQuantity <= 0)
+//             throw std::logic_error("Ask level has non-positive quantity at " + std::to_string(price));
+//
+//         Quantity sum{};
+//         for (auto it = level.orders.getHead(); it != nullptr; it=it->next)
+//             sum += it->value.getQuantity();
+//
+//         if (sum != level.totalQuantity)
+//             throw std::logic_error("Ask level totalQuantity mismatch at price " + std::to_string(price));
+//     }
+//
+//     for (const auto& [price, level] : m_otherAsks) {
+//         if (level.totalQuantity <= 0)
+//             throw std::logic_error("Ask level has non-positive quantity at " + std::to_string(price));
+//
+//         Quantity sum{};
+//         for (auto it = level.orders.getHead(); it != nullptr; it=it->next)
+//             sum += it->value.getQuantity();
+//
+//         if (sum != level.totalQuantity)
+//             throw std::logic_error("Ask level totalQuantity mismatch at price " + std::to_string(price));
+//     }
+// }

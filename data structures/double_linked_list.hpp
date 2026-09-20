@@ -1,19 +1,24 @@
 #pragma once
-///TODO: thread-safe List
-///update, nu cred ca se va intampla prea curand
 
 #include "Types.hpp"
 #include <vector>
 #include <memory>
+#include <stdexcept>
+#include <utility>
+
+/// forward declaration (pentru owner{})
+template <typename T>
+class List;
 
 template<typename T>
 struct ListNode {
     T value{};
     ListNode<T>* prev{};
     ListNode<T>* next{};
+    List<T>* owner{};       /// Verificarea ca un nod apartine unei liste
 };
 
-///Although NodePool este o lista simplu inlantuita si next este momentan nefolosit, nodurile alocate in pool
+///NodePool este o lista simplu inlantuita si next este momentan nefolosit, nodurile alocate in pool
 ///ajung sa fie folosite in lista dublu inlantuita; daca am defini un nou tip de nod special pentru NodePool,
 ///am economisi 8 bytes pentru fiecare nod, dar dupa ar trebui facuta o conversie intre nodurile alocate si cele pe care vrem
 ///sa le folosim
@@ -127,6 +132,10 @@ ListNode<T>* List<T>::erase(ListNode<T>* node) {
     if (!node)
         return nullptr;
 
+    if (node->owner != this)
+        return nullptr;
+
+    node->owner = nullptr;
     auto* aux = node->next;
     if (node->prev)
         node->prev->next = node->next;
@@ -146,7 +155,14 @@ ListNode<T>* List<T>::erase(ListNode<T>* node) {
 
 template<typename T>
 ListNode<T>* List<T>::insert(ListNode<T>* node, T value) {
+    if (node && node->owner != this)
+        return nullptr;
+
+    if (!node && m_size)
+        return nullptr;
+
     auto* newNode = m_pool->allocate();
+    newNode->owner = this;
     newNode->value = std::move(value);
     if (!m_size) {
         m_head = m_tail = newNode;
@@ -169,13 +185,17 @@ ListNode<T>* List<T>::insert(ListNode<T>* node, T value) {
 
 template<typename T>
 void List<T>::push_back(T value) {
-    insert(m_tail, std::move(value));
+
+    if (!insert(m_tail, std::move(value)))
+        throw std::logic_error("Tail node does not belong to this list");
 }
 
 template<typename T>
 void List<T>::push_front(T value) {
     auto* newNode = m_pool->allocate();
     newNode->value = std::move(value);
+    newNode->owner = this;
+
     if (!m_size) {
         m_head = m_tail = newNode;
         ++m_size;
