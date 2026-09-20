@@ -3,6 +3,7 @@
 #include <string_view>
 #include <cstdint>
 #include <iomanip>
+#include <cstddef>
 
 using Timestamp = std::int64_t;//stored in nanoseconds
 using SequenceNumber = std::int64_t;//differentiate between buys/sells when modifying an order

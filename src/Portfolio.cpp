@@ -1,6 +1,7 @@
 #include "Portfolio.hpp"
 #include "OrderBook.hpp"
 #include <algorithm>
+#include <cstdlib>
 
 void Portfolio::applyFill(const Fill &fill) {
     PositionState& pos = m_positions[fill.getSymbol()];

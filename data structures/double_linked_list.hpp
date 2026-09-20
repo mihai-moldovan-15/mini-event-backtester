@@ -5,6 +5,8 @@
 #include "Types.hpp"
 #include <vector>
 #include <memory>
+#include <stdexcept>
+#include <utility>
 
 /// forward declaration (pentru owner{})
 template <typename T>

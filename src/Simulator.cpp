@@ -6,6 +6,9 @@
 #include <chrono>
 #include <sstream>
 #include <stdexcept>
+#include <limits>
+#include <cctype>
+
 #include "Types.hpp"
 #include "Event.hpp"
 
@@ -103,7 +106,7 @@ void Simulator::loadHistoricalEvents(const std::filesystem::path& dataFile) {
 
     ///ts action orderId ownerId SIDE quantity price
     const Symbol symbol{"AAA"};
-    constexpr Timestamp tsScale{10'000'000};///ts urile din fisier sunt tickuri, motorul lucreaza in ns: 1 tick = 10ms
+    constexpr Timestamp tsScale{10'000'000};            ///ts urile din fisier sunt tickuri, motorul lucreaza in ns: 1 tick = 10ms
     std::unordered_map<OrderId, Symbol> histSymbols;
     OrderId maxHistId{};
 

@@ -27,17 +27,17 @@ public:
     Order(SymbolView symbol, Timestamp ts, Side side, Quantity quantity, OrderType type,
           std::optional<Price> limitPrice = std::nullopt, bool isOwn = false);
 
-    OrderId getOrderId() const { return m_id; }
-    const Symbol& getSymbol() const { return m_symbol; }
-    Timestamp getTimeStamp() const { return m_ts; }
-    Side getOrderSide() const { return m_side; }
-    Quantity getQuantity() const { return m_quantity; }
-    OrderType getOrderType() const { return m_type; }
-    const std::optional<Price>& getLimitPrice() const { return m_limitPrice; }
-    bool isOwn() const { return m_isOwn; }
+    [[nodiscard]] OrderId getOrderId() const { return m_id; }
+    [[nodiscard]] const Symbol& getSymbol() const { return m_symbol; }
+    [[nodiscard]] Timestamp getTimeStamp() const { return m_ts; }
+    [[nodiscard]] Side getOrderSide() const { return m_side; }
+    [[nodiscard]] Quantity getQuantity() const { return m_quantity; }
+    [[nodiscard]] OrderType getOrderType() const { return m_type; }
+    [[nodiscard]] const std::optional<Price>& getLimitPrice() const { return m_limitPrice; }
+    [[nodiscard]] bool isOwn() const { return m_isOwn; }
 
     void setQuantity(Quantity newQuantity) { m_quantity = newQuantity; }
 
     friend std::ostream& operator<<(std::ostream& out, const Order& order);
-    friend std::istream& operator>>(std::istream& in, Order& order);
+    //friend std::istream& operator>>(std::istream& in, Order& order);
 };
