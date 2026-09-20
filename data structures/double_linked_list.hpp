@@ -1,6 +1,4 @@
 #pragma once
-///TODO: thread-safe List
-///update, nu cred ca se va intampla prea curand
 
 #include "Types.hpp"
 #include <vector>
@@ -20,7 +18,7 @@ struct ListNode {
     List<T>* owner{};       /// Verificarea ca un nod apartine unei liste
 };
 
-///Although NodePool este o lista simplu inlantuita si next este momentan nefolosit, nodurile alocate in pool
+///NodePool este o lista simplu inlantuita si next este momentan nefolosit, nodurile alocate in pool
 ///ajung sa fie folosite in lista dublu inlantuita; daca am defini un nou tip de nod special pentru NodePool,
 ///am economisi 8 bytes pentru fiecare nod, dar dupa ar trebui facuta o conversie intre nodurile alocate si cele pe care vrem
 ///sa le folosim
@@ -64,8 +62,6 @@ public:
         node->next = m_freeHead;
         m_freeHead = node;
     }
-    // REVIEW: Lipsă destructor - când NodePool este distrus, blocurile alocate în m_blocks nu sunt niciodată eliberate
-    // Raspuns: Smart pointerii asigura eliberarea memoriei cand m_blocks e distrus
 };
 
 template<typename T>
@@ -133,11 +129,9 @@ bool List<T>::empty() const { return !m_size; }
 
 template<typename T>
 ListNode<T>* List<T>::erase(ListNode<T>* node) {
-    // REVIEW: Lipsă verificare de limite - nu verifică dacă pointerul nodului aparține acestei liste, permițând coruperea cu pointeri invalizi
     if (!node)
         return nullptr;
 
-    // Raspuns:
     if (node->owner != this)
         return nullptr;
 
@@ -161,8 +155,6 @@ ListNode<T>* List<T>::erase(ListNode<T>* node) {
 
 template<typename T>
 ListNode<T>* List<T>::insert(ListNode<T>* node, T value) {
-    // REVIEW: Lipsă verificare de limite - nu verifică dacă pointerul nodului aparține acestei liste, permițând coruperea cu pointeri invalizi
-    // Raspuns:
     if (node && node->owner != this)
         return nullptr;
 

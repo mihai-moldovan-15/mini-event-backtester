@@ -49,8 +49,6 @@ void Simulator::run() {
         }
         else {
             m_currentTime = persTs;
-            // REVIEW: Folosirea const_cast pentru a muta din priority_queue este comportament nedefinit - top() returnează referință const
-            // Raspuns: am pus shared_ptr in loc de unique_ptr
             std::shared_ptr<Event> event = m_personalEvents.top();
             m_personalEvents.pop();
             event->execute(*this);

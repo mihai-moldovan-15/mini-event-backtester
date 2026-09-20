@@ -6,6 +6,9 @@
 #include <algorithm>
 #include <iterator>
 
+// Review: fmtPrice uses std::ostringstream, std::setfill, and std::setw below, but this file does not include <sstream> or <iomanip>, so the project fails to compile.
+// Response: #included them, the code ran on my machine, should work now.
+
 Price OrderBook::getMarkPrice() const {
     Price bestAskPrice{ getBestAsk() };
     Price bestBidPrice{ getBestBid() };
@@ -68,7 +71,7 @@ void OrderBook::recordTrade(const Order& incoming, const Order& existing, Price 
                                .isOwn = existing.isOwn(), .fillQty = qty ,.fillPrice = price} );
 }
 
-// REVIEW: Logica de matching pentru ordinele de cumpărare și vânzare este aproape identică dar duplicată, poti folosi o functie helper
+
 std::vector<ResponseEvent> OrderBook::processAddOrder(const Order& order, Cash availableCash, const Timestamp currentTime,
                                                       Price commissionPerShare) {
     Order newOrder = order;
