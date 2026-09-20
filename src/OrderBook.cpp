@@ -3,6 +3,7 @@
 #include <format>
 #include <stdexcept>
 
+// Review: fmtPrice uses std::ostringstream, std::setfill, and std::setw below, but this file does not include <sstream> or <iomanip>, so the project fails to compile.
 void OrderBook::validate() const {
     if (m_symbol.empty())
         throw std::invalid_argument("Missing book symbol");
