@@ -351,6 +351,7 @@ std::ostream& operator<<(std::ostream& out, const OrderBook& book) {
         out << '\n';
         ++printed;
            }
+}
 
 //Dead code
 // std::ostream& operator<<(std::ostream& out, const OrderBook& book) {
