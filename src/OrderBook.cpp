@@ -1,4 +1,5 @@
 #include "OrderBook.hpp"
+
 #include <format>
 #include <stdexcept>
 #include <sstream>
@@ -71,7 +72,6 @@ void OrderBook::recordTrade(const Order& incoming, const Order& existing, Price 
                                .isOwn = existing.isOwn(), .fillQty = qty ,.fillPrice = price} );
 }
 
-
 std::vector<ResponseEvent> OrderBook::processAddOrder(const Order& order, Cash availableCash, const Timestamp currentTime,
                                                       Price commissionPerShare) {
     Order newOrder = order;
@@ -99,6 +99,7 @@ std::vector<ResponseEvent> OrderBook::processAddOrder(const Order& order, Cash a
                 Quantity qty = std::min(newOrder.getQuantity(), existing.getQuantity());
 
                 if (newOrder.isOwn()) {
+                    ///cumparam noi, deci platim si comisionul pe fiecare actiune
                     const Cash costPerShare = existingPrice + commissionPerShare;
                     auto affordableQty = static_cast<Quantity>(remainingCash / costPerShare);
                     if (affordableQty == 0) {
@@ -136,7 +137,7 @@ std::vector<ResponseEvent> OrderBook::processAddOrder(const Order& order, Cash a
             }
         }
     }
-    else {
+    else { ///Side::Sell
         auto& relevantLevels = m_relevantBids;
         auto& otherLevels = m_otherBids;
         bool inRelevant = true;
@@ -267,6 +268,7 @@ std::vector<ResponseEvent> OrderBook::processModifyOrder(OrderId id, Quantity ne
         responses.push_back({ResponseType::ModifyFailed, id, m_symbol, currentTime, Side{}, isOwnRequest});
         return responses;
     }
+
     if (newQty <= 0) {
         responses.push_back({ResponseType::ModifyFailed, id, m_symbol, currentTime, it->second.side,
                              it->second.it->value.isOwn()});
@@ -293,11 +295,63 @@ std::vector<ResponseEvent> OrderBook::processModifyOrder(OrderId id, Quantity ne
 
 
 std::string fmtPrice(Price p) {
+    //Claude Opus 4.8 Medium effort
     std::ostringstream os;
     os << p / 100 << '.' << std::setfill('0') << std::setw(2) << p % 100;
     return os.str();
 }
 
+std::ostream& operator<<(std::ostream& out, const OrderBook& book) {
+    std::string title = "ORDER BOOK FOR " + book.getSymbol();
+    constexpr int totalWidth{ 60 };
+    constexpr int colWidth{ 12 };
+
+    out << std::string((totalWidth - static_cast<int>(title.size())) / 2, ' ')
+        << title << "\n\n";
+
+    out << std::left
+        << std::setw(colWidth * 2) << "BIDS"
+        << " | "
+        << std::setw(colWidth * 2) << "ASKS" << '\n';
+
+    out << std::setw(colWidth) << "Price"
+        << std::setw(colWidth) << "Qty"
+        << " | "
+        << std::setw(colWidth) << "Price"
+        << std::setw(colWidth) << "Qty" << '\n';
+
+    out << std::string(totalWidth, '-') << '\n';
+
+    auto bidIt{ book.getRelevantBids().begin() };
+    auto askIt{ book.getRelevantAsks().begin() };
+
+    const size_t maxLevels{ 20 };
+    size_t printed{};
+
+    while ((bidIt != book.getRelevantBids().end() || askIt != book.getRelevantAsks().end())
+           && printed < maxLevels) {
+        if (bidIt != book.getRelevantBids().end()) {
+            out << std::setw(colWidth) << fmtPrice(bidIt->first)
+                << std::setw(colWidth) << bidIt->second.totalQuantity;
+            ++bidIt;
+        }
+        else
+            out << std::setw(colWidth * 2) << "";
+
+        out << " | ";
+
+        if (askIt != book.getRelevantAsks().end()) {
+            out << std::setw(colWidth) << fmtPrice(askIt->first)
+                << std::setw(colWidth) << askIt->second.totalQuantity;
+            ++askIt;
+        }
+        else
+            out << std::setw(colWidth * 2) << "";
+
+        out << '\n';
+        ++printed;
+           }
+}
 
 //Dead code
 // std::ostream& operator<<(std::ostream& out, const OrderBook& book) {
